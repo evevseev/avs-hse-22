@@ -1,0 +1,20 @@
+2d1
+< 	.intel_syntax noprefix
+14c13
+< 	push	rbp
+---
+> 	pushq	%rbp
+17c16
+< 	mov	rbp, rsp
+---
+> 	movq	%rsp, %rbp
+19c18
+< 	lea	rdi, .LC0[rip]
+---
+> 	leaq	.LC0(%rip), %rdi
+21,22c20,21
+< 	mov	eax, 0
+< 	pop	rbp
+---
+> 	movl	$0, %eax
+> 	popq	%rbp
