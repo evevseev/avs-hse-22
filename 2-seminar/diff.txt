@@ -1,0 +1,4 @@
+36c36
+<   shell_sort(a, argc);
+---
+>   shell_sort(a, argc - 1);
