@@ -108,8 +108,6 @@ main:
         ret                 # back to caller
 ```
 
----
-
 ![](/3-seminar/screenshots/3-1.jpg)
 ![](/3-seminar/screenshots/3-2.jpg)
 
