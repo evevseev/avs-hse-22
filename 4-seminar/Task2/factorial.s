@@ -5,8 +5,7 @@
 factorial:
     push    rbp
     mov     rbp, rsp
-    
-    mov     rdi, rax    # аргумент, число факториал которого мы ищем         
+             
     mov     eax, 1      # значение факториала
     mov     esi, 2      # next number to mult
     
