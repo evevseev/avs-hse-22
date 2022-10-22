@@ -1,9 +1,7 @@
-# read from console
-	.file	"consoleio.c"
 	.intel_syntax noprefix
 	.text
 	.section	.rodata
-# Консольные подсказки
+# Консольные подсказки и формат ввода
 .LC0:
 	.string	"Enter n: "
 .LC1:
@@ -13,8 +11,20 @@
 	.text
 	.globl	read_array_from_console
 	.type	read_array_from_console, @function
+
+	# ## read_array_from_console()
+	# ### Локальные перменные
+	# - DWORD -4[rbp]     - i
+	# - DWORD -8[rbp]     - n
+	# - QWORD -24[rbp]    - &array
+	# - DWORD -28[rbp]    - max_size
+	# ### Параметры и возвращаемый результат
+	# - rdi - &array
+	# - esi - max_size
+	# - rax (return) - array_size
+
 read_array_from_console:
-	endbr64							#
+	endbr64							
 
 	push	rbp						# /
 	mov	rbp, rsp					# \ стандартный пролог
@@ -24,10 +34,18 @@ read_array_from_console:
 	mov	DWORD PTR -28[rbp], esi		# \ max_size
 
 .L4:								# < цикл ввода массива
+	# printf()
+	# rsi - value
+	# rdi - format
+	# eax - count of xmm values 
 	lea	rdi, .LC0[rip]				# / вывод подсказки
 	mov	eax, 0						# |
 	call	printf@PLT				# \ 
 
+	# __isoc99_scanf()
+	# rsi - where to read
+	# rdi - format
+	# eax = 0 (calling convention)
 	lea	rax, -8[rbp]				# / = &n
 	mov	rsi, rax					# |
 	lea	rdi, .LC1[rip]				# | формат ввода
@@ -42,6 +60,10 @@ read_array_from_console:
 	jge	.L3							# \ goto .L3
 
 .L2:
+	# printf()
+	# rsi - value
+	# rdi - format
+	# eax - count of xmm values 
 	mov	eax, DWORD PTR -28[rbp]		# // 
 	mov	esi, eax					# |\ esi = max_size
 	lea	rdi, .LC2[rip]				# | формат вывода
@@ -56,6 +78,11 @@ read_array_from_console:
 	mov	eax, DWORD PTR -4[rbp]		# / 
 	cdqe							# \ rax = i
 	lea	rdx, 0[0+rax*4]				# < rdx = i * 4
+
+	# __isoc99_scanf()
+	# rsi - where to read
+	# rdi - format
+	# eax = 0 (calling convention)
 	mov	rax, QWORD PTR -24[rbp]		# //
 	add	rax, rdx					# ||
 	mov	rsi, rax					# |\ rsi = &array[i]
@@ -73,7 +100,7 @@ read_array_from_console:
 	leave							# |
 	ret								# \
 
-# PRINT ARRAT
+# ###############
 	.size	read_array_from_console, .-read_array_from_console
 	.section	.rodata
 .LC3:
@@ -81,6 +108,14 @@ read_array_from_console:
 	.text
 	.globl	print_array
 	.type	print_array, @function
+	# ## print_array()
+	# ### Локальные перменные
+	# - DWORD -4[rbp]     - i
+	# - QWORD -24[rbp]    - &array
+	# - DWORD -28[rbp]    - size
+	# ### Параметры и возвращаемый результат
+	# - rdi - &array
+	# - esi - size
 print_array:
 	endbr64							# 
 
@@ -103,6 +138,10 @@ print_array:
 	add	rax, rdx					# |
 	mov	eax, DWORD PTR [rax]		# \ eax = array[i]
 
+	# printf()
+	# rsi - value
+	# rdi - format
+	# eax - count of xmm values 
 	mov	esi, eax					# / значение = array[i]
 	lea	rdi, .LC3[rip]				# | формат вывода
 	mov	eax, 0						# | 
@@ -113,30 +152,11 @@ print_array:
 	mov	eax, DWORD PTR -4[rbp]		# /
 	cmp	eax, DWORD PTR -28[rbp]		# | if i < size
 	jl	.L10						# \ goto к выводу
-
+	
+	# putchar()
+	# rdi - char
 	mov	edi, 10						# / 
-	call	putchar@PLT				# \ print("\n")
+	call	putchar@PLT				# \ print('\n')
 	nop								#
 	leave							# /
 	ret								# \ return
-
-	# служебные метки gcc 
-	.size	print_array, .-print_array
-	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
-	.section	.note.GNU-stack,"",@progbits
-	.section	.note.gnu.property,"a"
-	.align 8
-	.long	 1f - 0f
-	.long	 4f - 1f
-	.long	 5
-0:
-	.string	 "GNU"
-1:
-	.align 8
-	.long	 0xc0000002
-	.long	 3f - 2f
-2:
-	.long	 0x3
-3:
-	.align 8
-4:

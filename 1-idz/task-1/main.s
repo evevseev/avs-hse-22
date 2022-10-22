@@ -1,74 +1,91 @@
-	.file	"main.c"
 	.intel_syntax noprefix
 	.text
-	.local	ARRAY
-	.comm	ARRAY,4800000,32
+	.local	ARRAY				# / Выделяем память под ARRAY
+	.comm	ARRAY,4800000,32	# \
 	.section	.rodata
-# Для парсинга аргументов запуска
+# Подсказки при некорректных аргументах аргментах и строки для парсинга аргументов запуска
 .LC0:
 	.string	"-file"
 	.align 8
-# Подсказка при некорректных аргументах аргментах
 .LC1:
 	.string	"Usage: %s -file <input_file_path> [output_file_path]\n"
-# Для парсинга аргументов запуска
 .LC2:
 	.string	"-random"
 	.align 8
-# Подсказка при некорректных аргументах аргментах
 .LC3:
 	.string	"Usage: %s -random <from 0 to 300.000 array_size> <rand_seed>\n"
-# Для парсинга аргументов запуска
 .LC4:
 	.string	"-test"
-# Подсказка при некорректных аргументах аргментах
 .LC5:
 	.string	"Usage: %s -test <seed>\n"
-# Подсказка при некорректных аргументах аргментах
 .LC6:
 	.string	"Unknown arguments: %s\n"
 	.align 8
-# Шаблон сообщения для вывода времени исполнения
 .LC7:
 	.string	"Time elapsed: %ld microseconds\n"
 	.text
 	.globl	main
 	.type	main, @function
+
+# ## main()
+# ### Локальные перменные
+# - DWORD -4[rbp]     - array_size
+# - DWORD -8[rbp]     - rand_seed
+# - DWORD -12[rbp]    - input_mode
+# - DWORD -16[rbp]    - clocks_elapsed
+# - DWORD -20[rbp]    - i
+# - QWORD -32[rbp]    - file_path
+# - QWORD -40[rbp]    - start_time 
+# - QWORD -48[rbp]    - end_time
+# - DWORD -52[rbp]    - количество аргументов запуска
+# - QWORD -64[rbp]    - указатель на аргументы
+# ### Параметры и возвращаемый результат
+# - edi - argc
+# - rsi - argc
+# - rax (return) - exit code
+
 main:
-	endbr64							# < Системное, можно удалить
+	endbr64
 
-	push	rbp						# /  Стандартный пролог сохранения указателя стэка вызывающей функции
-	mov	rbp, rsp					# \
+	push	rbp						# /  Стандартный пролог,
+	mov	rbp, rsp					# \  cохранения указателя стэка вызывающей функции
 
-	sub	rsp, 64						# < выделяем память под локальные переменные
+	sub	rsp, 64						# < выделяем память под локальные переменные на стеке
 
-									# Сохраняем на стеке:
-	mov	DWORD PTR -52[rbp], edi		# < edi - кол-во аргуметов запуска
-	mov	QWORD PTR -64[rbp], rsi		# < rsi - указать на массив с аргументами
+									# / Сохраняем на стеке:
+	mov	DWORD PTR -52[rbp], edi		# | edi - кол-во аргуметов запуска
+	mov	QWORD PTR -64[rbp], rsi		# \ rsi - указать на массив с аргументами
 
-	cmp	DWORD PTR -52[rbp], 1		# / if rsi == 1
-	jne	.L2							# \
-	mov	DWORD PTR -12[rbp], 0	
+	cmp	DWORD PTR -52[rbp], 1		# / if rsi != 1
+	jne	.L2							# \ goto .L2
+	mov	DWORD PTR -12[rbp], 0		# < input_mode = 0
 
-	mov	esi, 300000					# < Максимальный размер
-	lea	rdi, ARRAY[rip]				# < Адрес результатирующего массива
-	call	read_array_from_console@PLT
-	mov	DWORD PTR -4[rbp], eax		# < Сохраняем результат (размер массива)
+	# read_array_from_console()
+	# rdi - &array
+	# esi - max_size
+	# rax (return) - array_size
+	mov	esi, 300000						# / max_size
+	lea	rdi, ARRAY[rip]					# | &ARRAY
+	call	read_array_from_console@PLT # |
+	mov	DWORD PTR -4[rbp], eax			# \ array_size = read_array_from_console(&ARRAY, 300000)
 
-	jmp	.L3							# < else 
+	jmp	.L3							
 
-# < if rsi != 1
-.L2:
+.L2:								# < if rsi != 1
 	mov	rax, QWORD PTR -64[rbp]		# /
 	add	rax, 8						# |
 	mov	rax, QWORD PTR [rax]		# \ rax = argv[1]
-
-	lea	rsi, .LC0[rip]				# / -file
-	mov	rdi, rax					# | 
+	
+	# strcmp()
+	# rsi - 2nd string
+	# rdi - 1st string
+	# rax (return) - comparison result
+	lea	rsi, .LC0[rip]				# / "-file"
+	mov	rdi, rax					# | argv[1]
 	call	strcmp@PLT				# \ strcmp(argv[1], "-file")
 
-	test	eax, eax				# / if not so
-	jne	.L4							# \ got to .L4
+	test	eax, eax				# / if strcmp(argv[1], "-file") == 0
+	jne	.L4							# \	goto .L4
 
 	cmp	DWORD PTR -52[rbp], 2		# / if argc > 2
 	jg	.L5							# \ go to L5
@@ -76,6 +93,10 @@ main:
 	mov	rax, QWORD PTR -64[rbp]		# /
 	mov	rax, QWORD PTR [rax]		# \ rax = argv[0]
 
+	# printf()
+	# rsi - value
+	# rdi - format
+	# eax - count of xmm values 
 	mov	rsi, rax					# / Печать сообщения об ошибке
 	lea	rdi, .LC1[rip]				# |
 	mov	eax, 0						# |
@@ -89,11 +110,16 @@ main:
 	mov	QWORD PTR -32[rbp], rax		# / [можно оптимизировать ]
 	mov	rax, QWORD PTR -32[rbp]		# \ Компилятор сохраняет на стеке, так как будет происходить повторное обращение при выводе
 	
-	mov	edx, 300000					# < третий аргумент, максимальный размер
-	mov	rsi, rax					# < второй аргумент, путь к файлу
-	lea	rdi, ARRAY[rip]				# < первый аргумент, куда читаем
-	call	read_array_from_file@PLT
-	mov	DWORD PTR -4[rbp], eax		# < array_size = результат функции
+	# read_array_from_file()
+	# rdi - &array
+	# rsi - &filepath
+	# edx - max_size
+	# rax (return) - array_size
+	mov	edx, 300000					# /
+	mov	rsi, rax					# |
+	lea	rdi, ARRAY[rip]				# |
+	call	read_array_from_file@PLT # |
+	mov	DWORD PTR -4[rbp], eax		# \ array_size = read_array_from_file(&ARRAY, &filepath, 300000)
 
 	mov	DWORD PTR -12[rbp], 1		# < input_mode = 1
 	jmp	.L3
@@ -102,12 +128,16 @@ main:
 	add	rax, 8						# / 
 	mov	rax, QWORD PTR [rax]		# \ rax = argv[1]
 
-	lea	rsi, .LC2[rip]				# / strcmp(argv[1], "-random")
+	# strcmp()
+	# rsi - 2nd string
+	# rdi - 1st string
+	# rax (return) - comparison result
+	lea	rsi, .LC2[rip]				# /
 	mov	rdi, rax					# | 
-	call	strcmp@PLT				# \ 
+	call	strcmp@PLT				# \  strcmp(argv[1], "-random")
 
 	test	eax, eax				# / if strcmp(argv[1], "-random") == 0
-	jne	.L7							# \ if not, then .L7
+	jne	.L7							# \ goto .L7
 
 	cmp	DWORD PTR -52[rbp], 3		# / if argc > 3:
 	jg	.L8							# \		then go .L8
@@ -116,8 +146,12 @@ main:
 	mov	rax, QWORD PTR -64[rbp]		# < rax = &argv
 	mov	rax, QWORD PTR [rax]		# < rax = argv[0]
 
+	# printf()
+	# rsi - value
+	# rdi - format
+	# eax - count of xmm values 
 	mov	rsi, rax					# / Выводим сообщение об ошибке
-	lea	rdi, .LC3[rip]				# |
+	lea	rdi, .LC3[rip]				# | текст подсказки 
 	mov	eax, 0						# |
 	call	printf@PLT				# \
 
@@ -129,23 +163,34 @@ main:
 	add	rax, 16						# /	rax = argv[2]
 	mov	rax, QWORD PTR [rax]		# \
 
-	mov	rdi, rax					# / Получаем число из argv[2] 
-	call	atoi@PLT				# \
-	mov	DWORD PTR -4[rbp], eax		# < array_size = atoi(argv[2])
+	# atoi()
+	# rdi - string
+	# rax (return) - int value
+	mov	rdi, rax					# / argv[2] 
+	call	atoi@PLT				# |
+	mov	DWORD PTR -4[rbp], eax		# \ array_size = atoi(argv[2])
 
 	mov	rax, QWORD PTR -64[rbp]		# < rax = &argv
 	add	rax, 24						# /	rax = argv[3]
 	mov	rax, QWORD PTR [rax]		# \
 
-	mov	rdi, rax					# / Получаем число из argv[3] 	
-	call	atoi@PLT				# \
-	mov	DWORD PTR -8[rbp], eax		# rand_seed =  atoi(argv[3])
+	# atoi()
+	# rdi - string
+	# rax (return) - int value
+	mov	rdi, rax					# / argv[3] 	
+	call	atoi@PLT				# |
+	mov	DWORD PTR -8[rbp], eax		# \ rand_seed =  atoi(argv[3])
 
-	mov	edx, DWORD PTR -8[rbp]		# < третий, rand_seed
-	mov	eax, DWORD PTR -4[rbp]		# / второй аргумент, array_size
-	mov	esi, eax					# \
-	lea	rdi, ARRAY[rip]				# < третий аргумент, &ARRAY
-	call	random_fill_array@PLT	
+	# random_fill_array()
+	# rdi - &array
+	# esi - size
+	# edx - seed
+	# rax (return) - array_size
+	mov	edx, DWORD PTR -8[rbp]		# / rand_seed
+	mov	eax, DWORD PTR -4[rbp]		# | array_size
+	mov	esi, eax					# |
+	lea	rdi, ARRAY[rip]				# | &ARRAY
+	call	random_fill_array@PLT	# \
 	mov	DWORD PTR -12[rbp], 2		# < input_mode = 2
 	jmp	.L3							
 .L7:
@@ -153,6 +198,10 @@ main:
 	add	rax, 8						# |
 	mov	rax, QWORD PTR [rax]		# \ rax = argv[1]
 
+	# strcmp()
+	# rsi - 2nd string
+	# rdi - 1st string
+	# rax (return) - comparison result
 	lea	rsi, .LC4[rip]				# / strcmp(argv[1], "-test")
 	mov	rdi, rax					# |
 	call	strcmp@PLT				# \
@@ -166,6 +215,10 @@ main:
 	mov	rax, QWORD PTR -64[rbp]		# / rax = arv[0]
 	mov	rax, QWORD PTR [rax]		# \
 
+	# printf()
+	# rsi - value
+	# rdi - format
+	# eax - count of xmm values 
 	mov	rsi, rax					# / Выводим сообщение об ошибке
 	lea	rdi, .LC5[rip]				# |
 	mov	eax, 0						# |
@@ -179,16 +232,24 @@ main:
 	add	rax, 16						# |
 	mov	rax, QWORD PTR [rax]		# \ rax = arv[1]
 
+	# atoi()
+	# rdi - string
+	# rax (return) - int value
 	mov	rdi, rax					# /
 	call	atoi@PLT				# |
 	mov	DWORD PTR -8[rbp], eax		# \ rand_seed = atoi(argv[2])
 	mov	DWORD PTR -12[rbp], 3		# < input_mode = 3;
 	jmp	.L3							# < переход к обработке
+
 .L9:
 	mov	rax, QWORD PTR -64[rbp]		# /
 	add	rax, 8						# |
 	mov	rax, QWORD PTR [rax]		# \ rax = argv[1]
 
+	# printf()
+	# rsi - value
+	# rdi - format
+	# eax - count of xmm values 
 	mov	rsi, rax					# / Выводим сообщение об ошибке
 	lea	rdi, .LC6[rip]				# |
 	mov	eax, 0						# |
@@ -209,17 +270,26 @@ main:
 
 # for loop if input_mode == 3
 .L13:
-	mov	eax, DWORD PTR -8[rbp] 		# / /	третий аргумент, 
-	mov	edx, eax					# | \ edx = rand_seed
-	mov	esi, 300000					# | второй аргумент, размер массива
-	lea	rdi, ARRAY[rip]				# | первый аргумент, &ARRAY
+	# read_array_from_file()
+	# rdi - &array
+	# rsi - &filepath
+	# edx - max_size
+	# rax (return) - array_size
+	mov	eax, DWORD PTR -8[rbp] 		# / /
+	mov	edx, eax					# | \ rand_seed
+	mov	esi, 300000					# | array_size
+	lea	rdi, ARRAY[rip]				# | &ARRAY
 	call	random_fill_array@PLT	# \
 
+	# clock()
 	call	clock@PLT				# / 
 	mov	QWORD PTR -40[rbp], rax		# \ start_time = clock()
 	
-	mov	esi, 300000					# / второй аргумент, размер массива
-	lea	rdi, ARRAY[rip]				# | первый аргумент, &ARRAY
+	# process_array()
+	# rdi - &array
+	# esi - size
+	mov	esi, 300000					# / размер массива
+	lea	rdi, ARRAY[rip]				# | &ARRAY
 	call	process_array@PLT		# \ 
 
 	call	clock@PLT				# /
@@ -242,16 +312,21 @@ main:
 	jle	.L13						# |	go .L13
 	jmp	.L14						# \ else go .L14 (output)
 
-# for loop if input_mode != 3
-.L11:
+
+.L11:					
+	# clock()
 	call	clock@PLT				# / 
 	mov	QWORD PTR -40[rbp], rax		# \ start_time = clock()
 
-	mov	eax, DWORD PTR -4[rbp]		# / / 2ой аргумент = array_size
+	# process_array()
+	# rdi - &array
+	# esi - size
+	mov	eax, DWORD PTR -4[rbp]		# / array_size
 	mov	esi, eax					# | \
-	lea	rdi, ARRAY[rip]				# |	1ый аргумент = &ARRAY
+	lea	rdi, ARRAY[rip]				# |	 &ARRAY
 	call	process_array@PLT		# \
 
+	# clock()
 	call	clock@PLT				# /
 	mov	QWORD PTR -48[rbp], rax		# \ end_time = clock()
 
@@ -276,11 +351,14 @@ main:
 	cmp	DWORD PTR -52[rbp], 3		# |if not, go to L16
 	jne	.L16						# \
 
-# print array
+
 .L15:
-	mov	eax, DWORD PTR -4[rbp]		# / 2ой аргумент, array_size
+	# print_array()
+	# rdi - &array
+	# esi - size
+	mov	eax, DWORD PTR -4[rbp]		# / array_size
 	mov	esi, eax					# \ 
-	lea	rdi, ARRAY[rip]				# < 1ый аргумент, &ARRAY
+	lea	rdi, ARRAY[rip]				# < &ARRAY
 	call	print_array@PLT			# print array to console
 
 	jmp	.L17						# go to ptinting elapsed time
@@ -293,15 +371,24 @@ main:
 	mov	rax, QWORD PTR -64[rbp] 	# /
 	mov	rax, QWORD PTR 24[rax]		# \ rax = arv[3]
 	mov	QWORD PTR -32[rbp], rax		# < file_path = rax
-	mov	rdx, QWORD PTR -32[rbp]		# / 3ий аргумент, file_path
+
+	# save_array_to_file()
+	# rdi - &array
+	# rsi - &filepath
+	# edx - size
+	mov	rdx, QWORD PTR -32[rbp]		# / file_path
 	mov	eax, DWORD PTR -4[rbp]		# |	/
-	mov	esi, eax					# |	\ 2ой аргумент, array_size
-	lea	rdi, ARRAY[rip]				# | 1ый аргумент, &ARRAY
+	mov	esi, eax					# |	\ array_size
+	lea	rdi, ARRAY[rip]				# | &ARRAY
 	call	save_array_to_file@PLT	# \
 
 .L17:
+	# printf()
+	# rsi - value
+	# rdi - format
+	# eax - count of xmm values
 	mov	eax, DWORD PTR -16[rbp]		# / Пеачать clock_elapsed
-	cdqe							# | < системная штука, которую можно убрать
+	cdqe							# | < convert eax to rax (не обязателен)
 	mov	rsi, rax					# |
 	lea	rdi, .LC7[rip]				# |
 	mov	eax, 0						# |
@@ -311,24 +398,3 @@ main:
 .L6:
 	leave							# / Exit :) 
 	ret								# \
-	
-	# А дальше, GCC оставляет свой след в истории написания IDZ 1 :)
-	.size	main, .-main
-	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
-	.section	.note.GNU-stack,"",@progbits
-	.section	.note.gnu.property,"a"
-	.align 8
-	.long	 1f - 0f
-	.long	 4f - 1f
-	.long	 5
-0:
-	.string	 "GNU"
-1:
-	.align 8
-	.long	 0xc0000002
-	.long	 3f - 2f
-2:
-	.long	 0x3
-3:
-	.align 8
-4:

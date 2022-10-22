@@ -1,8 +1,19 @@
-	.file	"random.c"
 	.intel_syntax noprefix
 	.text
 	.globl	random_fill_array
 	.type	random_fill_array, @function
+
+	# ## random_fill_array()
+	# ### Локальные перменные
+	# - DWORD -4[rbp]     - i
+	# - QWORD -24[rbp]	- &array
+	# - DWORD -28[rbp]    - size
+	# - DWORD -32[rbp]	- seed
+	# ### Параметры и возвращаемый результат
+	# - rdi - &array
+	# - esi - size
+	# - edx - seed
+	# - rax (return) - array_size
 random_fill_array:
 	endbr64							# < ситемная штука
 	push	rbp						# / стандартный пролог
@@ -13,6 +24,8 @@ random_fill_array:
 	mov	DWORD PTR -28[rbp], esi		# < size
 	mov	DWORD PTR -32[rbp], edx		# < seed
 
+	# srand()
+	# rdi - seed
 	mov	eax, DWORD PTR -32[rbp]		# / /1ый аргумент, seed
 	mov	edi, eax					# | \
 	call	srand@PLT				# \ srand(seed)
@@ -22,6 +35,8 @@ random_fill_array:
 
 # Первый цикл
 .L3:
+	# rand()
+	# rax - result
 	call	rand@PLT				# /
 	neg	eax							# | edx = -rand()
 	mov	edx, eax					# \
@@ -67,6 +82,8 @@ random_fill_array:
 
 # Второй цикл
 .L5:								# 
+	# rand()
+	# rax - result
 	call	rand@PLT				# /
 	movsx	rdx, eax				# |
 	imul	rdx, rdx, 1374389535	# |
@@ -98,24 +115,3 @@ random_fill_array:
 	mov	eax, DWORD PTR -28[rbp]		# < else eax = size
 	leave							# /
 	ret								# \ return size
-	
-	# служебные метки
-	.size	random_fill_array, .-random_fill_array
-	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
-	.section	.note.GNU-stack,"",@progbits
-	.section	.note.gnu.property,"a"
-	.align 8
-	.long	 1f - 0f
-	.long	 4f - 1f
-	.long	 5
-0:
-	.string	 "GNU"
-1:
-	.align 8
-	.long	 0xc0000002
-	.long	 3f - 2f
-2:
-	.long	 0x3
-3:
-	.align 8
-4:
