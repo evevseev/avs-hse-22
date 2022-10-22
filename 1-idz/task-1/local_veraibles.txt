@@ -1,0 +1,30 @@
+
+DWORD PTR -4[rbp] - array size
+DWORD PTR -52[rbp] - количество аргументов запуска
+QWORD PTR -64[rbp] - указатель на аргументы
+QWORD PTR -32[rbp] - file_path
+DWORD PTR -8[rbp] - rand seem
+
+DWORD PTR -12[rbp] = input_mode
+DWORD PTR -16[rbp] = clocks_elapsed
+
+mov	DWORD PTR -20[rbp] = i1
+
+QWORD PTR -40[rbp] = start_time 
+QWORD PTR -48[rbp] = end_time
+
+стоило перенести внутрь main
+
+
+RANDOM
+
+	mov	QWORD PTR -24[rbp], rdi	 = array
+	mov	DWORD PTR -28[rbp], esi = size
+	mov	DWORD PTR -32[rbp], edx	 = seed
+    DWORD PTR -4[rbp] = i
+
+arrayprocess
+
+	mov	QWORD PTR -24[rbp] = arrya
+	mov	DWORD PTR -28[rbp] = size
+	mov	DWORD PTR -4[rbp] = i
