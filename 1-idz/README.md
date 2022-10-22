@@ -9,7 +9,7 @@
 ручного редактирования исходного текста ассемблерной программы.
 - [ ] Модифицированная ассемблерная программа отдельно откомпилирована
 и скомпонована без использования опций отладки.
-- [ ] Представлено полное тестовое покрытие, дающее одинаковый результат
+- [x] Представлено полное тестовое покрытие, дающее одинаковый результат
 на обоих программах. Приведены результаты тестовых прогонов для обоих программ, демонстрирующие эквивалентность функционирования.
 - [ ] Сформировать отчет, описывающий результаты тестовых прогонов и используемых опций компиляции и/или описания проведенных модификаций.
 
@@ -62,16 +62,16 @@
 
 ## main()
 ### Локальные перменные
-- DWORD -4[rbp]     - array size
-- DWORD -8[rbp]     - rand_seed
-- DWORD -12[rbp]    - input_mode
-- DWORD -16[rbp]    - clocks_elapsed
-- DWORD -20[rbp]    - i
-- QWORD -32[rbp]    - file_path
-- QWORD -40[rbp]    - start_time 
-- QWORD -48[rbp]    - end_time
-- DWORD -52[rbp]    - количество аргументов запуска
-- QWORD -64[rbp]    - указатель на аргументы
+- DWORD - 4[rbp]     - array size
+- DWORD - 8[rbp]     - rand_seed
+- DWORD - 12[rbp]    - input_mode
+- DWORD - 16[rbp]    - clocks_elapsed
+- DWORD - 20[rbp]    - i
+- QWORD - 32[rbp]    - file_path
+- QWORD - 40[rbp]    - start_time 
+- QWORD - 48[rbp]    - end_time
+- DWORD - 52[rbp]    - количество аргументов запуска
+- QWORD - 64[rbp]    - указатель на аргументы
 ### Параметры и возвращаемый результат
 - edi - argc
 - rsi - argc
@@ -79,10 +79,10 @@
 
 ## random_fill_array()
 ### Локальные перменные
-- DWORD -4[rbp]     - i
-- QWORD -24[rbp]	- array
-- DWORD -28[rbp]    - size
-- DWORD -32[rbp]	- seed
+- DWORD - 4[rbp]     - i
+- QWORD - 24[rbp]	- array
+- DWORD - 28[rbp]    - size
+- DWORD - 32[rbp]	- seed
 ### Параметры и возвращаемый результат
 - rdi - &array
 - esi - size
@@ -91,19 +91,19 @@
 
 ## process_array()
 ### Локальные перменные
-- DWORD -4[rbp]     - i
-- QWORD -24[rbp]    - arrya
-- DWORD -28[rbp]    - size
+- DWORD - 4[rbp]     - i
+- QWORD - 24[rbp]    - arrya
+- DWORD - 28[rbp]    - size
 ### Параметры и возвращаемый результат
 - rdi - &array
 - esi - size
 
 ## read_from_console()
 ### Локальные перменные
-- DWORD -4[rbp]     - i
-- DWORD -8[rbp]     - n
-- QWORD -24[rbp]    - &array
-- DWORD -28[rbp]    - max_size
+- DWORD - 4[rbp]     - i
+- DWORD - 8[rbp]     - n
+- QWORD - 24[rbp]    - &array
+- DWORD - 28[rbp]    - max_size
 ### Параметры и возвращаемый результат
 - rdi - &array
 - esi - max_size
@@ -111,21 +111,21 @@
 
 ## print_array()
 ### Локальные перменные
-- DWORD -4[rbp]     - i
-- QWORD -24[rbp]    - &array
-- DWORD -28[rbp]    - size
+- DWORD - 4[rbp]     - i
+- QWORD - 24[rbp]    - &array
+- DWORD - 28[rbp]    - size
 ### Параметры и возвращаемый результат
 - rdi - &array
 - esi - size
 
 ## read_array_from_file()
 ### Локальные перменные
-- DWORD -4[rbp]     - i
-- QWORD -16[rbp]    - &in_file
-- DWORD -20[rbp]    - n
-- QWORD -40[rbp]    - &array
-- QWORD -48[rbp]    - &filepath
-- DWORD -52[rbp]    - max_size
+- DWORD - 4[rbp]     - i
+- QWORD - 16[rbp]    - &in_file
+- DWORD - 20[rbp]    - n
+- QWORD - 40[rbp]    - &array
+- QWORD - 48[rbp]    - &filepath
+- DWORD - 52[rbp]    - max_size
 ### Параметры и возвращаемый результат
 - rdi - &array
 - rsi - &filepath
@@ -134,11 +134,48 @@
 
 ## save_array_to_file()
 ### Локальные перменные
-- QWORD -16[rbp]    - FILE
-- QWORD -24[rbp]    - &array
-- DWORD -28[rbp]    - size
-- QWORD -40[rbp]    - filepath
+- QWORD - 16[rbp]    - FILE
+- QWORD - 24[rbp]    - &array
+- DWORD - 28[rbp]    - size
+- QWORD - 40[rbp]    - filepath
 ### Параметры и возвращаемый результат
 - rdi - &array
 - rsi - &filepath
 - edx - size
+
+
+# Но для начала, пару слов...
+Программа сразу разрабатывалась с учетом всех требований включительно до 9.
+Поэтому, с самого начала присутствуем разделение на модули, работа с файлами и прочее
+
+# Mark 4
+- [ASM код исходника на С](/c-source/) 
+- [АSM код с комментариями](/asm-source/)
+
+Для получения изначального ASM кода
+```
+gcc -masm=intel \
+    -fno-asynchronous-unwind-tables \
+    -fno-jump-tables \
+    -fno-stack-protector \
+    -fno-exceptions \
+    ./c-source/*.c \
+    -S 
+```
+
+Для компиляции обоих программ: 
+```
+gcc *.s
+```
+
+
+Резльтаты тестовых прогонов обоих программ на одинаковых наборах случайных данных
+``` 
+python3 tests/main.py c-source/a.out task-1/a.out
+```
+```
+✓ c-source/a.out:       Console Tests passed
+✓ task-1/a.out: Console Tests passed
+✓ c-source/a.out:       File Tests passed
+✓ task-1/a.out: File Tests passed
+```
