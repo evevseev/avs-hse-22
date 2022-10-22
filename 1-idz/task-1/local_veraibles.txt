@@ -28,3 +28,29 @@ arrayprocess
 	mov	QWORD PTR -24[rbp] = arrya
 	mov	DWORD PTR -28[rbp] = size
 	mov	DWORD PTR -4[rbp] = i
+
+read from console
+	mov	QWORD PTR -24[rbp], rdi &array
+	mov	DWORD PTR -28[rbp], esi max_size
+    -8[rbp]	 = n
+    DWORD PTR -4[rbp] = i
+
+print console
+    mov	DWORD PTR -4[rbp],  = i
+
+    mov	QWORD PTR -24[rbp], rdi		 &array
+	mov	DWORD PTR -28[rbp], esi		= size
+
+# read array from file = 
+	mov	QWORD PTR -40[rbp], rdi = &array
+	mov	QWORD PTR -48[rbp], rsi = &filepath
+	mov	DWORD PTR -52[rbp], edx = max_size
+    QWORD PTR -16[rbp] = &in_file
+    -20[rbp]	= n
+    mov	DWORD PTR -4[rbp] = i
+
+# save to file 
+	mov	QWORD PTR -24[rbp], rdi		# / сохранение аргументов, &array
+	mov	DWORD PTR -28[rbp], esi		# | size
+	mov	QWORD PTR -40[rbp], rdx		# \ filepath
+		mov	QWORD PTR -16[rbp], rax		# \ FILE = fopen(filepath, "w")
