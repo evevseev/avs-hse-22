@@ -31,8 +31,8 @@ read_array_from_console:
 	test	eax, eax
 	jle	.L2
 	mov	eax, DWORD PTR -8[rbp]
-	cmp	eax, 300000
-	jle	.L3
+	cmp	DWORD PTR -28[rbp], eax
+	jge	.L3
 .L2:
 	mov	eax, DWORD PTR -28[rbp]
 	mov	esi, eax

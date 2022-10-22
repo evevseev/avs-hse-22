@@ -5,7 +5,7 @@ int read_array_from_console(int *array, int max_size) {
     while (1) {
         printf("Enter n: ");
         scanf("%d", &n);
-        if (n < 1 || n > 300000) {
+        if (n < 1 || n > max_size) {
             printf("n must be in range [1, %d]\n", max_size);
         } else {
             break;
