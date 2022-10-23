@@ -194,10 +194,10 @@ Running 300 tests on each executable...
 
 
 # Mark 9
-- [ASM код исходника на С (version-0)](/version-0/) 
-- [АSM код с комментариями (version-1)](/version-1/)
-- [АSM код с преимущественным использованием регистров (version-2)](/version-2/)
-- [Различные опции оптимизации](/with-optimization-flags/)
+- [ASM код исходника на С (version-0)](./version-0/) 
+- [АSM код с комментариями (version-1)](./version-1/)
+- [АSM код с преимущественным использованием регистров (version-2)](./version-2/)
+- [Различные опции оптимизации](./with-optimization-flags/)
 
 Для получения ASM кода использовались следующие опции
 ```
