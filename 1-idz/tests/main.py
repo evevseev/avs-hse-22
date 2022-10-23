@@ -1,4 +1,3 @@
-
 import os
 import random
 import sys
@@ -32,6 +31,28 @@ def run_test(exe: str, input: str, arguments: list) -> str:
     process = subprocess.Popen([exe] + arguments, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output, error = process.communicate(input=input.encode())
     return output.decode()
+
+
+def test_random(exe: str, tests_qnt: int) -> bool:
+    for i in range(tests_qnt):
+        output =  run_test(exe, "", ["-random", "30000", str(random.randint(1, 10000))])
+        generated_string = output.split("\n")[0]
+        generated_data =  [int(x) for x in generated_string.split()] 
+        result_string = output.split("\n")[1]
+        result_data = [int(x) for x in result_string.split()]
+        correct_answer = generated_data.copy()
+        for j in range(len(correct_answer)):
+            if correct_answer[j] <= 0:
+                correct_answer[j] -= 5
+            else:
+                break
+        if result_data != correct_answer:
+            print("Input: ")
+            print(generated_data)
+            print("Output: ")
+            print(result_data)
+            return False
+    return True
 
 def tests(exe: str, data: list, test_data: list, file: bool = False) -> bool:
     for data in test_data:
@@ -93,7 +114,14 @@ if __name__ == "__main__":
     tests_qnt = 300
     test_data = list([generate_test_data() for _ in range(tests_qnt)])
 
-    print(f"Running {tests_qnt} tests on each executable...")
+    print(f"\nRunning {tests_qnt} tests of random on each executable...")
+    for exe in executables:
+        if test_random(exe, tests_qnt):
+            print(f"{bcolors.OKGREEN}✓ {exe}:\tRandom Tests Passed{bcolors.ENDC}")
+        else:
+            print(f"{bcolors.FAIL}X {exe}:\t Random Tests Failed{bcolors.ENDC}")
+            exit(1)
+    print(f"\nRunning {tests_qnt} tests on each executable...")
     for exe in executables:
         if not tests(exe, test_data, test_data):
             print(f"{bcolors.FAIL}X {exe}:\tConsole Tests failed{bcolors.ENDC}")
