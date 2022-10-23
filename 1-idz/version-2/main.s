@@ -191,6 +191,15 @@ main:
 	mov	esi, eax					# |
 	lea	rdi, ARRAY[rip]				# | &ARRAY
 	call	random_fill_array@PLT	# \
+
+	# print_array()
+	# rdi - &array
+	# esi - size
+	mov	esi, DWORD PTR -4[rbp]		# / array_size
+	lea	rdi, ARRAY[rip]				# | &ARRAY
+	call	print_array@PLT			# | print_array(&ARRAY, array_size)
+	mov	DWORD PTR -12[rbp], 2		# \ input_mode = 2
+
 	mov	DWORD PTR -12[rbp], 2		# < input_mode = 2
 	jmp	.L3							
 .L7:

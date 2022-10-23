@@ -4,22 +4,22 @@
 # Оглавление
 
 ### Введение
-- [О программе](#01-immediate.s)
-    - [Входные данные](#01-immediate.s)
-    - [Аргументы запуска](#01-immediate.s)
-    - [Функции и локальные переменные в ASM](#fdsfd)
-- [Представленные файлы](#01-immediate.s)
-- [О тестировании](#01-immediate.s)
+- [О программе](#О-программе)
+    - [Входные данные](#Входные-данные)
+    - [Аргументы запуска](#Аргументы-запуска)
+    - [Функции-и-локальные-переменные-в-ASM](#Функции-и-локальные-переменные-в-ASM)
+- [Представленные файлы](#Представленные-файлы)
+- [О тестировании](#О-тестировании)
 ### Отчет
-- [Mark 4](#01-immediate.s)
-- [Mark 5](#02-register.s)
-- [Mark 6](#03-memory.s)
-- [Mark 7](#04-constToMemory.s)
-- [Mark 8](#05-jumps.s)
-- [Mark 9](#05-jumps.s)
+- [Mark 4](#Mark-4)
+- [Mark 5](#Mark-5)
+- [Mark 6](#Mark-6)
+- [Mark 7](#Mark-7)
+- [Mark 8](#Mark-8)
+- [Mark 9](#Mark-9)
 
 ### Прочее
-- [Checklist](#05-jumps.s)
+- [Checklist](#Checklist)
 
 
 # Введение
@@ -91,6 +91,11 @@ gcc *.s
 python3 tests/main.py c-source/a.out version-1/a.out
 ```
 ```
+Running 300 tests of random on each executable...
+✓ c-source/a.out:       Random Tests Passed
+✓ version-1/a.out:      Random Tests Passed
+
+Running 300 tests on each executable...
 ✓ c-source/a.out:       Console Tests passed
 ✓ version-1/a.out: Console Tests passed
 ✓ c-source/a.out:       File Tests passed
@@ -149,16 +154,16 @@ python3 tests/main.py c-source/a.out version-1/a.out version-2/a.out
 Running tests on executables: c-source/a.out, version-1/a.out, version-2/a.out
 Running 300 tests on each executable...
 ✓ c-source/a.out:       Console Tests passed
-✓ version-1/a.out: Console Tests passed
-✓ version-2/a.out: Console Tests passed
+✓ version-1/a.out:      Console Tests passed
+✓ version-2/a.out:      Console Tests passed
 ✓ c-source/a.out:       File Tests passed
-✓ version-1/a.out: File Tests passed
-✓ version-2/a.out: File Tests passed
+✓ version-1/a.out:      File Tests passed
+✓ version-2/a.out:      File Tests passed
 
 Running stress tests on each executable... 
-c-source/a.out: 6.630322 seconds
-version-1/a.out:   6.650191 seconds
-version-2/a.out:   1.121077 seconds
+c-source/a.out:     6.630322 seconds
+version-1/a.out:    6.650191 seconds
+version-2/a.out:    1.121077 seconds
 ```
 
 # Оценка 7

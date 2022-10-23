@@ -109,6 +109,10 @@ main:
 	mov	esi, eax
 	lea	rdi, ARRAY[rip]
 	call	random_fill_array@PLT
+	mov	eax, DWORD PTR -4[rbp]
+	mov	esi, eax
+	lea	rdi, ARRAY[rip]
+	call	print_array@PLT
 	mov	DWORD PTR -12[rbp], 2
 	jmp	.L3
 .L7:

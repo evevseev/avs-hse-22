@@ -44,6 +44,7 @@ int main(int argc, char *argv[]) {
             array_size = atoi(argv[2]);
             rand_seed = atoi(argv[3]);
             random_fill_array(ARRAY, array_size, rand_seed);
+            print_array(ARRAY, array_size);
             input_mode = 2;
         } else if (strcmp(argv[1], "-test") == 0) {
             if (argc <= 2) {
