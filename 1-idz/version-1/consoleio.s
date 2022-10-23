@@ -13,7 +13,7 @@
 	.type	read_array_from_console, @function
 
 	# ## read_array_from_console()
-	# ### Локальные перменные
+	# ### Локальные переменные
 	# - DWORD -4[rbp]     - i
 	# - DWORD -8[rbp]     - n
 	# - QWORD -24[rbp]    - &array
@@ -110,7 +110,7 @@ read_array_from_console:
 	.type	print_array, @function
 	
 	# ## print_array()
-	# ### Локальные перменные
+	# ### Локальные переменные
 	# - DWORD -4[rbp]     - i
 	# - QWORD -24[rbp]    - &array
 	# - DWORD -28[rbp]    - size

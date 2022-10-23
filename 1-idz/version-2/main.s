@@ -28,7 +28,7 @@
 	.type	main, @function
 
 # ## main()
-# ### Локальные перменные
+# ### Локальные переменные
 # - DWORD -4[rbp]     - array_size
 # - DWORD -8[rbp]     - rand_seed
 # - DWORD -12[rbp]    - input_mode

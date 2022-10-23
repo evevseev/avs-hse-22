@@ -4,7 +4,7 @@
 	.type	random_fill_array, @function
 
 	# ## random_fill_array()
-	# ### Локальные перменные
+	# ### Локальные переменные
 	# - DWORD -4[rbp]     - i
 	# - QWORD -24[rbp]	- &array
 	# - DWORD -28[rbp]    - size

@@ -13,7 +13,7 @@
 	.type	read_array_from_file, @function
 
 	# ## read_array_from_file()
-	# ### Локальные перменные
+	# ### Локальные переменные
 	# - DWORD -4[rbp]     - i
 	# - QWORD -16[rbp]    - &in_file
 	# - DWORD -20[rbp]    - n
@@ -146,7 +146,7 @@ read_array_from_file:
 	.type	save_array_to_file, @function
 	
 	# ## save_array_to_file()
-	# ### Локальные перменные
+	# ### Локальные переменные
 	# - QWORD -16[rbp]    - &out_file
 	# - QWORD -24[rbp]    - &array
 	# - DWORD -28[rbp]    - size
