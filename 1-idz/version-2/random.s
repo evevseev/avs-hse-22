@@ -32,7 +32,7 @@ random_fill_array:
 
 	# srand()
 	# rdi - seed
-	# mov	eax, edx		# / /1ый аргумент, seed
+	# mov	eax, edx				# / /1ый аргумент, seed
 	mov	edi, edx					# | \
 	call	srand@PLT				# \ srand(seed)
 
@@ -91,7 +91,7 @@ random_fill_array:
 	# rand()
 	# rax - result
 	call	rand@PLT				# /
-	movsx	rdx, eax				# |
+	movsx	rdx, eax				# | rdx = rand()
 	imul	rdx, rdx, 1374389535	# |
 	shr	rdx, 32						# |
 	mov	ecx, edx					# |

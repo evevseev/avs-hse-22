@@ -27,6 +27,7 @@
 	# QWORD PTR -24[rbp] = &array => r15
 	# DWORD PTR -28[rbp] = max_size => r14
 	# DWORD PTR -4[rbp] = i => r13
+
 read_array_from_console:
 	endbr64							
 
@@ -112,6 +113,7 @@ read_array_from_console:
 	.text
 	.globl	print_array
 	.type	print_array, @function
+	
 	# ## print_array()
 	# ### Локальные перменные
 	# - DWORD -4[rbp]     - i

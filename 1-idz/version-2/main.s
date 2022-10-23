@@ -3,7 +3,7 @@
 	.local	ARRAY				# / Выделяем память под ARRAY
 	.comm	ARRAY,4800000,32	# \
 	.section	.rodata
-# Подсказки при некорректных аргументах аргментах и строки для парсинга аргументов запуска
+# Подсказки при некорректных аргументах и строки для парсинга аргументов запуска
 .LC0:
 	.string	"-file"
 	.align 8
@@ -62,7 +62,7 @@ main:
 
 	# read_array_from_console()
 	# rdi - &array
-	# esi - max_size
+	# rsi - max_size
 	# rax (return) - array_size
 	mov	esi, 300000						# / max_size
 	lea	rdi, ARRAY[rip]					# | &ARRAY
@@ -270,10 +270,10 @@ main:
 
 # for loop if input_mode == 3
 .L13:
-	# read_array_from_file()
+	# random_fill_array()
 	# rdi - &array
-	# rsi - &filepath
-	# edx - max_size
+	# esi - size
+	# edx - seed
 	# rax (return) - array_size
 	mov	eax, DWORD PTR -8[rbp] 		# / /
 	mov	edx, eax					# | \ rand_seed
@@ -374,8 +374,8 @@ main:
 
 	# save_array_to_file()
 	# rdi - &array
-	# rsi - &filepath
-	# edx - size
+	# rsi - size
+	# edx - &filepath
 	mov	rdx, QWORD PTR -32[rbp]		# / file_path
 	mov	eax, DWORD PTR -4[rbp]		# |	/
 	mov	esi, eax					# |	\ array_size

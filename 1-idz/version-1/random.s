@@ -14,6 +14,7 @@
 	# - esi - size
 	# - edx - seed
 	# - rax (return) - array_size
+
 random_fill_array:
 	endbr64							# < ситемная штука
 	push	rbp						# / стандартный пролог
@@ -85,7 +86,7 @@ random_fill_array:
 	# rand()
 	# rax - result
 	call	rand@PLT				# /
-	movsx	rdx, eax				# |
+	movsx	rdx, eax				# | rdx = rand()
 	imul	rdx, rdx, 1374389535	# |
 	shr	rdx, 32						# |
 	mov	ecx, edx					# |

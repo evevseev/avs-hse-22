@@ -108,6 +108,7 @@ read_array_from_console:
 	.text
 	.globl	print_array
 	.type	print_array, @function
+	
 	# ## print_array()
 	# ### Локальные перменные
 	# - DWORD -4[rbp]     - i

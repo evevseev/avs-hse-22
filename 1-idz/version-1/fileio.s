@@ -45,7 +45,7 @@ read_array_from_file:
 	lea	rsi, .LC0[rip]				# | mode
 	mov	rdi, rax					# | rdi = filepath
 	call	fopen@PLT				# | открытие файла
-	mov	QWORD PTR -16[rbp], rax		# \ FILE
+	mov	QWORD PTR -16[rbp], rax		# \ in_file = fopen(filepath, mode)
 
 	# __isoc99_fscanf()
 	# rdi - FILE*
@@ -58,7 +58,7 @@ read_array_from_file:
 	mov	rdi, rax					# |
 	mov	eax, 0						# |
 	call	__isoc99_fscanf@PLT		# |
-	mov	eax, DWORD PTR -20[rbp]		# \ n = fscanf(file, "%d", &n)
+	mov	eax, DWORD PTR -20[rbp]		# \ fscanf(file, "%d", &n)
 
 	test	eax, eax				# / if (n < 0)
 	jle	.L2							# \ goto .L2
@@ -148,8 +148,8 @@ read_array_from_file:
 	# - QWORD -40[rbp]    - &filepath
 	# ### Параметры и возвращаемый результат
 	# - rdi - &array
-	# - rsi - &filepath
-	# - edx - size
+	# - rsi - size
+	# - edx - &filepath
 save_array_to_file:
 	endbr64							#
 
@@ -170,7 +170,7 @@ save_array_to_file:
 	lea	rsi, .LC3[rip]				# |
 	mov	rdi, rax					# |
 	call	fopen@PLT				# |
-	mov	QWORD PTR -16[rbp], rax		# \ FILE = fopen(filepath, "w")
+	mov	QWORD PTR -16[rbp], rax		# \ out_file = fopen(filepath, "w")
 	
 	# printf()
 	# rsi - value
