@@ -23,7 +23,7 @@ factorial:
     jmp     factorial
     
 end:
-    # Вывод результата
+    # Output
     mov     esi, edi                # value
     lea     rdi, format_out[rip]    # format
     xor     eax, 0                  # not using xmm
