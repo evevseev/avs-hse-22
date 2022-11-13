@@ -1,408 +1,406 @@
 	.intel_syntax noprefix
 	.text
-	.local	ARRAY				# / Выделяем память под ARRAY
-	.comm	ARRAY,4800000,32	# \
 	.section	.rodata
-# Подсказки при некорректных аргументах и строки для парсинга аргументов запуска
+	.align 8
 .LC0:
+	.string	"String to find was not provided"rand
+.LC1:
 	.string	"-file"
 	.align 8
-.LC1:
-	.string	"Usage: %s -file <input_file_path> [output_file_path]\n"
 .LC2:
+	.string	"Usage: %s <substr> -file <input_file_path> [output_file_path]\n"
+.LC3:
 	.string	"-random"
 	.align 8
-.LC3:
-	.string	"Usage: %s -random <from 0 to 300.000 array_size> <rand_seed>\n"
 .LC4:
-	.string	"-test"
+	.string	"Usage: %s <substr> -random <seed> <from 0 to 300.000 string_size>\n"
 .LC5:
-	.string	"Usage: %s -test <seed>\n"
+	.string	"-test"
+	.align 8
 .LC6:
-	.string	"Unknown arguments: %s\n"
+	.string	"Usage: %s <substr> -test <seed>\n"
 	.align 8
 .LC7:
+	.string	"Unknown argument or in wrong position: %s\n"
+.LC8:
+	.string	"w"
+.LC9:
+	.string	"%ld "
+	.align 8
+.LC10:
 	.string	"Time elapsed: %ld microseconds\n"
 	.text
 	.globl	main
 	.type	main, @function
-
-# ## main()
-# ### Локальные переменные
-# - DWORD -4[rbp]     - array_size
-# - DWORD -8[rbp]     - rand_seed
-# - DWORD -12[rbp]    - input_mode
-# - DWORD -16[rbp]    - clocks_elapsed
-# - DWORD -20[rbp]    - i
-# - QWORD -32[rbp]    - file_path
-# - QWORD -40[rbp]    - start_time 
-# - QWORD -48[rbp]    - end_time
-# - DWORD -52[rbp]    - количество аргументов запуска
-# - QWORD -64[rbp]    - указатель на аргументы
-# ### Параметры и возвращаемый результат
-# - edi - argc
-# - rsi - argc
-# - rax (return) - exit code
-
 main:
-	endbr64
+	endbr64	
+	push	rbp	
+	mov	rbp, rsp
 
-	push	rbp						# /  Стандартный пролог,
-	mov	rbp, rsp					# \  cохранения указателя стэка вызывающей функции
+	sub	rsp, 112
+	mov	DWORD PTR -100[rbp], edi	; argc
+	mov	QWORD PTR -112[rbp], rsi	; argv
+; if (argc < 2) {
+	cmp	DWORD PTR -100[rbp], 1	; argc
+	jg	.L2	
+; printf("String to find was not provided\n");
+	lea	rdi, .LC0[rip]
+	call	puts@PLT
+;         exit(1)
+	mov	edi, 1
+	call	exit@PLT
 
-	sub	rsp, 64						# < выделяем память под локальные переменные на стеке
+.L2:
+;     str_to_find = argv[1];
+	mov	rax, QWORD PTR -112[rbp]; tmp124, argv
+	mov	rax, QWORD PTR 8[rax]	; tmp125, MEM[(char * *)argv_59(D) + 8B]
+	mov	QWORD PTR -48[rbp], rax	; str_to_find, tmp125
+;     if (argc == 2) {
+	cmp	DWORD PTR -100[rbp], 2	; argc
+	jne	.L3
 
-									# / Сохраняем на стеке:
-	mov	DWORD PTR -52[rbp], edi		# | edi - кол-во аргуметов запуска
-	mov	QWORD PTR -64[rbp], rsi		# \ rsi - указать на массив с аргументами
+	mov	edi, 300000							; /
+	call	read_string_from_console@PLT	; |
+	mov	QWORD PTR -16[rbp], rax				; \ str_to_search_in = read_string_from_console(MAX_SIZE);
 
-	cmp	DWORD PTR -52[rbp], 1		# / if rsi != 1
-	jne	.L2							# \ goto .L2
-	mov	DWORD PTR -12[rbp], 0		# < input_mode = 0
-
-	# read_array_from_console()
-	# rdi - &array
-	# rsi - max_size
-	# rax (return) - array_size
-	mov	esi, 300000						# / max_size
-	lea	rdi, ARRAY[rip]					# | &ARRAY
-	call	read_array_from_console@PLT # |
-	mov	DWORD PTR -4[rbp], eax			# \ array_size = read_array_from_console(&ARRAY, 300000)
-
-	jmp	.L3							
-
-.L2:								# < if rsi != 1
-	mov	rax, QWORD PTR -64[rbp]		# /
-	add	rax, 8						# |
-	mov	rax, QWORD PTR [rax]		# \ rax = argv[1]
-	
-	# strcmp()
-	# rsi - 2nd string
-	# rdi - 1st string
-	# rax (return) - comparison result
-	lea	rsi, .LC0[rip]				# / "-file"
-	mov	rdi, rax					# | argv[1]
-	call	strcmp@PLT				# \ strcmp(argv[1], "-file")
-
-	test	eax, eax				# / if strcmp(argv[1], "-file") == 0
-	jne	.L4							# \	goto .L4
-
-	cmp	DWORD PTR -52[rbp], 2		# / if argc > 2
-	jg	.L5							# \ go to L5
-
-	mov	rax, QWORD PTR -64[rbp]		# /
-	mov	rax, QWORD PTR [rax]		# \ rax = argv[0]
-
-	# printf()
-	# rsi - value
-	# rdi - format
-	# eax - count of xmm values 
-	mov	rsi, rax					# / Печать сообщения об ошибке
-	lea	rdi, .LC1[rip]				# |
-	mov	eax, 0						# |
-	call	printf@PLT				# \
-
-	mov	eax, 1						# / exit(1)
-	jmp	.L6							# \
-.L5:
-	mov	rax, QWORD PTR -64[rbp]		# < rax = &argv
-	mov	rax, QWORD PTR 16[rax]		# < rax = argv[2]
-	mov	QWORD PTR -32[rbp], rax		# / [можно оптимизировать ]
-	mov	rax, QWORD PTR -32[rbp]		# \ Компилятор сохраняет на стеке, так как будет происходить повторное обращение при выводе
-	
-	# read_array_from_file()
-	# rdi - &array
-	# rsi - &filepath
-	# edx - max_size
-	# rax (return) - array_size
-	mov	edx, 300000					# /
-	mov	rsi, rax					# |
-	lea	rdi, ARRAY[rip]				# |
-	call	read_array_from_file@PLT # |
-	mov	DWORD PTR -4[rbp], eax		# \ array_size = read_array_from_file(&ARRAY, &filepath, 300000)
-
-	mov	DWORD PTR -12[rbp], 1		# < input_mode = 1
-	jmp	.L3
-.L4:
-	mov	rax, QWORD PTR -64[rbp]		# < rax = &argv
-	add	rax, 8						# / 
-	mov	rax, QWORD PTR [rax]		# \ rax = argv[1]
-
-	# strcmp()
-	# rsi - 2nd string
-	# rdi - 1st string
-	# rax (return) - comparison result
-	lea	rsi, .LC2[rip]				# /
-	mov	rdi, rax					# | 
-	call	strcmp@PLT				# \  strcmp(argv[1], "-random")
-
-	test	eax, eax				# / if strcmp(argv[1], "-random") == 0
-	jne	.L7							# \ goto .L7
-
-	cmp	DWORD PTR -52[rbp], 3		# / if argc > 3:
-	jg	.L8							# \		then go .L8
-									
-									# < else, выводим сообщение
-	mov	rax, QWORD PTR -64[rbp]		# < rax = &argv
-	mov	rax, QWORD PTR [rax]		# < rax = argv[0]
-
-	# printf()
-	# rsi - value
-	# rdi - format
-	# eax - count of xmm values 
-	mov	rsi, rax					# / Выводим сообщение об ошибке
-	lea	rdi, .LC3[rip]				# | текст подсказки 
-	mov	eax, 0						# |
-	call	printf@PLT				# \
-
-	mov	eax, 1						# / exit(1)
-	jmp	.L6							# \
-
-.L8:
-	mov	rax, QWORD PTR -64[rbp]     # < rax = &argv
-	add	rax, 16						# /	rax = argv[2]
-	mov	rax, QWORD PTR [rax]		# \
-
-	# atoi()
-	# rdi - string
-	# rax (return) - int value
-	mov	rdi, rax					# / argv[2] 
-	call	atoi@PLT				# |
-	mov	DWORD PTR -4[rbp], eax		# \ array_size = atoi(argv[2])
-
-	mov	rax, QWORD PTR -64[rbp]		# < rax = &argv
-	add	rax, 24						# /	rax = argv[3]
-	mov	rax, QWORD PTR [rax]		# \
-
-	# atoi()
-	# rdi - string
-	# rax (return) - int value
-	mov	rdi, rax					# / argv[3] 	
-	call	atoi@PLT				# |
-	mov	DWORD PTR -8[rbp], eax		# \ rand_seed =  atoi(argv[3])
-
-	# random_fill_array()
-	# rdi - &array
-	# esi - size
-	# edx - seed
-	# rax (return) - array_size
-	mov	edx, DWORD PTR -8[rbp]		# / rand_seed
-	mov	eax, DWORD PTR -4[rbp]		# | array_size
-	mov	esi, eax					# |
-	lea	rdi, ARRAY[rip]				# | &ARRAY
-	call	random_fill_array@PLT	# \
-
-	# print_array()
-	# rdi - &array
-	# esi - size
-	mov	esi, DWORD PTR -4[rbp]		# / array_size
-	lea	rdi, ARRAY[rip]				# | &ARRAY
-	call	print_array@PLT			# | print_array(&ARRAY, array_size)
-
-	mov	DWORD PTR -12[rbp], 2		# < input_mode = 2
-	jmp	.L3							
-.L7:
-	mov	rax, QWORD PTR -64[rbp]		# /
-	add	rax, 8						# |
-	mov	rax, QWORD PTR [rax]		# \ rax = argv[1]
-
-	# strcmp()
-	# rsi - 2nd string
-	# rdi - 1st string
-	# rax (return) - comparison result
-	lea	rsi, .LC4[rip]				# / strcmp(argv[1], "-test")
-	mov	rdi, rax					# |
-	call	strcmp@PLT				# \
-
-	test	eax, eax				# / if strcmp(argv[1], "-test") == 0
-	jne	.L9							# \	 if not, then gog L9
-
-	cmp	DWORD PTR -52[rbp], 2		# / if argc > 2
-	jg	.L10						# \   then go .L10
-
-	mov	rax, QWORD PTR -64[rbp]		# / rax = arv[0]
-	mov	rax, QWORD PTR [rax]		# \
-
-	# printf()
-	# rsi - value
-	# rdi - format
-	# eax - count of xmm values 
-	mov	rsi, rax					# / Выводим сообщение об ошибке
-	lea	rdi, .LC5[rip]				# |
-	mov	eax, 0						# |
-	call	printf@PLT				# \
-
-	mov	eax, 1						# / exit(1)
-	jmp	.L6							# \
-
-.L10:								# -test
-	mov	rax, QWORD PTR -64[rbp]		# /
-	add	rax, 16						# |
-	mov	rax, QWORD PTR [rax]		# \ rax = arv[1]
-
-	# atoi()
-	# rdi - string
-	# rax (return) - int value
-	mov	rdi, rax					# /
-	call	atoi@PLT				# |
-	mov	DWORD PTR -8[rbp], eax		# \ rand_seed = atoi(argv[2])
-	mov	DWORD PTR -12[rbp], 3		# < input_mode = 3;
-	jmp	.L3							# < переход к обработке
-
-.L9:
-	mov	rax, QWORD PTR -64[rbp]		# /
-	add	rax, 8						# |
-	mov	rax, QWORD PTR [rax]		# \ rax = argv[1]
-
-	# printf()
-	# rsi - value
-	# rdi - format
-	# eax - count of xmm values 
-	mov	rsi, rax					# / Выводим сообщение об ошибке
-	lea	rdi, .LC6[rip]				# |
-	mov	eax, 0						# |
-	call	printf@PLT				# \
-
-	mov	eax, 1						# / exit(1)
-	jmp	.L6							# \ 
-
-# Обработка массива
+	mov	DWORD PTR -4[rbp], 0				; < input_mode = 0;
+	jmp	.L4	;
 .L3:
-	mov	DWORD PTR -16[rbp], 0		# < clocks_elapsed = 0
-
-	cmp	DWORD PTR -12[rbp], 3		# / if input == 3
-	jne	.L11						# \ if not, go to .L11
-
-	mov	DWORD PTR -20[rbp], 0		# < int i = 0
-	jmp	.L12						# < for begin
-
-# for loop if input_mode == 3
-.L13:
-	# random_fill_array()
-	# rdi - &array
-	# esi - size
-	# edx - seed
-	# rax (return) - array_size
-	mov	eax, DWORD PTR -8[rbp] 		# / /
-	mov	edx, eax					# | \ rand_seed
-	mov	esi, 300000					# | array_size
-	lea	rdi, ARRAY[rip]				# | &ARRAY
-	call	random_fill_array@PLT	# \
-
-	# clock()
-	call	clock@PLT				# / 
-	mov	QWORD PTR -40[rbp], rax		# \ start_time = clock()
-	
-	# process_array()
-	# rdi - &array
-	# esi - size
-	mov	esi, 300000					# / размер массива
-	lea	rdi, ARRAY[rip]				# | &ARRAY
-	call	process_array@PLT		# \ 
-
-	call	clock@PLT				# /
-	mov	QWORD PTR -48[rbp], rax		# \ end_time = clock()
-
-	mov	rax, QWORD PTR -48[rbp]		# /
-	mov	edx, eax					# \ edx = end_time
-
-	mov	rax, QWORD PTR -40[rbp]		# /	
-	sub	edx, eax					# \ edx -= start_time
-
-	mov	eax, DWORD PTR -16[rbp]		# / 
-	add	eax, edx					# |	clocks_elapsed += edx
-	mov	DWORD PTR -16[rbp], eax		# \
-
-	add	DWORD PTR -20[rbp], 1		# < i += 1
-
-.L12:
-	cmp	DWORD PTR -20[rbp], 4999 	# / if i <= 4999
-	jle	.L13						# |	go .L13
-	jmp	.L14						# \ else go .L14 (output)
-
-
-.L11:					
-	# clock()
-	call	clock@PLT				# / 
-	mov	QWORD PTR -40[rbp], rax		# \ start_time = clock()
-
-	# process_array()
-	# rdi - &array
-	# esi - size
-	mov	eax, DWORD PTR -4[rbp]		# / array_size
-	mov	esi, eax					# | \
-	lea	rdi, ARRAY[rip]				# |	 &ARRAY
-	call	process_array@PLT		# \
-
-	# clock()
-	call	clock@PLT				# /
-	mov	QWORD PTR -48[rbp], rax		# \ end_time = clock()
-
-	mov	rax, QWORD PTR -48[rbp]		# / 
-	mov	edx, eax					# \ edx = end_time
-
-	mov	rax, QWORD PTR -40[rbp]		# /
-	sub	edx, eax					# \ edx -= start_time
-
-	mov	eax, DWORD PTR -16[rbp]		# /	
-	add	eax, edx					# |
-	mov	DWORD PTR -16[rbp], eax		# \ clocks_elapsed += edx
-
-.L14:
-	cmp	DWORD PTR -12[rbp], 0		# / if input_mode == 0
-	je	.L15						# | ||
-	cmp	DWORD PTR -12[rbp], 2		# | input_mode == 2
-	je	.L15						# \ got to .L15
-
-	cmp	DWORD PTR -12[rbp], 1		# / if input_mode == 1
-	jne	.L16						# |	&& argc == 3
-	cmp	DWORD PTR -52[rbp], 3		# |if not, go to L16
-	jne	.L16						# \
-
-
-.L15:
-	# print_array()
-	# rdi - &array
-	# esi - size
-	mov	eax, DWORD PTR -4[rbp]		# / array_size
-	mov	esi, eax					# \ 
-	lea	rdi, ARRAY[rip]				# < &ARRAY
-	call	print_array@PLT			# print array to console
-
-	jmp	.L17						# go to ptinting elapsed time
-
-# save to file
-.L16:
-	cmp	DWORD PTR -12[rbp], 1		# / continue further only if
-	jne	.L17						# \	input_mode == 1
-
-	mov	rax, QWORD PTR -64[rbp] 	# /
-	mov	rax, QWORD PTR 24[rax]		# \ rax = arv[3]
-	mov	QWORD PTR -32[rbp], rax		# < file_path = rax
-
-	# save_array_to_file()
-	# rdi - &array
-	# rsi - size
-	# edx - &filepath
-	mov	rdx, QWORD PTR -32[rbp]		# / file_path
-	mov	eax, DWORD PTR -4[rbp]		# |	/
-	mov	esi, eax					# |	\ array_size
-	lea	rdi, ARRAY[rip]				# | &ARRAY
-	call	save_array_to_file@PLT	# \
-
-.L17:
-	# printf()
-	# rsi - value
-	# rdi - format
-	# eax - count of xmm values
-	mov	eax, DWORD PTR -16[rbp]		# / Пеачать clock_elapsed
-	cdqe							# | < convert eax to rax (не обязателен)
-	mov	rsi, rax					# |
-	lea	rdi, .LC7[rip]				# |
-	mov	eax, 0						# |
-	call	printf@PLT				# \
-
-	mov	eax, 0						# < eax = 0 (return 0)
+;         if (strcmp(argv[2], "-file") == 0) {
+	mov	rax, QWORD PTR -112[rbp]	; tmp127, argv
+	add	rax, 16	; _1,
+;         if (strcmp(argv[2], "-file") == 0) {
+	mov	rax, QWORD PTR [rax]	; _2, *_1
+	lea	rsi, .LC1[rip]	;,
+	mov	rdi, rax	;, _2
+	call	strcmp@PLT	;
+;         if (strcmp(argv[2], "-file") == 0) {
+	test	eax, eax	; _3
+	jne	.L5	;,
+;             if (argc < 4) {
+	cmp	DWORD PTR -100[rbp], 3	; argc,
+	jg	.L6	;,
+;                 printf("Usage: %s <substr> -file <input_file_path> [output_file_path]\n", argv[0]);
+	mov	rax, QWORD PTR -112[rbp]	; tmp128, argv
+	mov	rax, QWORD PTR [rax]	; _4, *argv_59(D)
+	mov	rsi, rax	;, _4
+	lea	rdi, .LC2[rip]	;,
+	mov	eax, 0	;,
+	call	printf@PLT	;
+;                 return 1;
+	mov	eax, 1	; _47,
+	jmp	.L7	;
 .L6:
-	leave							# / Exit :) 
-	ret								# \
+;             file_path = argv[3];
+	mov	rax, QWORD PTR -112[rbp]	; tmp129, argv
+	mov	rax, QWORD PTR 24[rax]	; tmp130, MEM[(char * *)argv_59(D) + 24B]
+	mov	QWORD PTR -64[rbp], rax	; file_path, tmp130
+;             str_to_search_in = read_string_from_file(file_path, MAX_SIZE);
+	mov	rax, QWORD PTR -64[rbp]	; tmp131, file_path
+	mov	esi, 300000	;,
+	mov	rdi, rax	;, tmp131
+	call	read_string_from_file@PLT	;
+	mov	QWORD PTR -16[rbp], rax	; str_to_search_in, tmp132
+;             input_mode = 1;
+	mov	DWORD PTR -4[rbp], 1	; input_mode,
+	jmp	.L4	;
+.L5:
+;         } else if (strcmp(argv[2], "-random") == 0) {
+	mov	rax, QWORD PTR -112[rbp]	; tmp133, argv
+	add	rax, 16	; _5,
+;         } else if (strcmp(argv[2], "-random") == 0) {
+	mov	rax, QWORD PTR [rax]	; _6, *_5
+	lea	rsi, .LC3[rip]	;,
+	mov	rdi, rax	;, _6
+	call	strcmp@PLT	;
+;         } else if (strcmp(argv[2], "-random") == 0) {
+	test	eax, eax	; _7
+	jne	.L8	;,
+;             if (argc < 5) {
+	cmp	DWORD PTR -100[rbp], 4	; argc,
+	jg	.L9	;,
+;                 printf("Usage: %s <substr> -random <seed> <from 0 to 300.000 string_size>\n", argv[0]);
+	mov	rax, QWORD PTR -112[rbp]	; tmp134, argv
+	mov	rax, QWORD PTR [rax]	; _8, *argv_59(D)
+	mov	rsi, rax	;, _8
+	lea	rdi, .LC4[rip]	;,
+	mov	eax, 0	;,
+	call	printf@PLT	;
+;                 return 1;
+	mov	eax, 1	; _47,
+	jmp	.L7	;
+.L9:
+;             string_size_to_generate = atoi(argv[4]);
+	mov	rax, QWORD PTR -112[rbp]	; tmp135, argv
+	add	rax, 32	; _9,
+;             string_size_to_generate = atoi(argv[4]);
+	mov	rax, QWORD PTR [rax]	; _10, *_9
+	mov	rdi, rax	;, _10
+	call	atoi@PLT	;
+	mov	DWORD PTR -56[rbp], eax	; string_size_to_generate, tmp136
+;             rand_seed = atoi(argv[3]);
+	mov	rax, QWORD PTR -112[rbp]	; tmp137, argv
+	add	rax, 24	; _11,
+;             rand_seed = atoi(argv[3]);
+	mov	rax, QWORD PTR [rax]	; _12, *_11
+	mov	rdi, rax	;, _12
+	call	atoi@PLT	;
+	mov	DWORD PTR -52[rbp], eax	; rand_seed, tmp138
+;             str_to_search_in = (char *) malloc(string_size_to_generate * sizeof(char));
+	mov	eax, DWORD PTR -56[rbp]	; tmp139, string_size_to_generate
+	cdqe
+	mov	rdi, rax	;, _13
+	call	malloc@PLT	;
+	mov	QWORD PTR -16[rbp], rax	; str_to_search_in, tmp140
+;             generate_random_string(argv[1], str_to_search_in, string_size_to_generate, rand_seed);
+	mov	rax, QWORD PTR -112[rbp]	; tmp141, argv
+	add	rax, 8	; _14,
+;             generate_random_string(argv[1], str_to_search_in, string_size_to_generate, rand_seed);
+	mov	rax, QWORD PTR [rax]	; _15, *_14
+	mov	ecx, DWORD PTR -52[rbp]	; tmp142, rand_seed
+	mov	edx, DWORD PTR -56[rbp]	; tmp143, string_size_to_generate
+	mov	rsi, QWORD PTR -16[rbp]	; tmp144, str_to_search_in
+	mov	rdi, rax	;, _15
+	call	generate_random_string@PLT	;
+;             printf("%s\n", str_to_search_in);
+	mov	rax, QWORD PTR -16[rbp]	; tmp145, str_to_search_in
+	mov	rdi, rax	;, tmp145
+	call	puts@PLT	;
+;             input_mode = 2;
+	mov	DWORD PTR -4[rbp], 2	; input_mode,
+	jmp	.L4	;
+.L8:
+;         } else if (strcmp(argv[2], "-test") == 0) {
+	mov	rax, QWORD PTR -112[rbp]	; tmp146, argv
+	add	rax, 16	; _16,
+;         } else if (strcmp(argv[2], "-test") == 0) {
+	mov	rax, QWORD PTR [rax]	; _17, *_16
+	lea	rsi, .LC5[rip]	;,
+	mov	rdi, rax	;, _17
+	call	strcmp@PLT	;
+;         } else if (strcmp(argv[2], "-test") == 0) {
+	test	eax, eax	; _18
+	jne	.L10	;,
+;             if (argc < 4) {
+	cmp	DWORD PTR -100[rbp], 3	; argc,
+	jg	.L11	;,
+;                 printf("Usage: %s <substr> -test <seed>\n", argv[0]);
+	mov	rax, QWORD PTR -112[rbp]	; tmp147, argv
+	mov	rax, QWORD PTR [rax]	; _19, *argv_59(D)
+	mov	rsi, rax	;, _19
+	lea	rdi, .LC6[rip]	;,
+	mov	eax, 0	;,
+	call	printf@PLT	;
+;                 return 1;
+	mov	eax, 1	; _47,
+	jmp	.L7	;
+.L11:
+;             rand_seed = atoi(argv[3]);
+	mov	rax, QWORD PTR -112[rbp]	; tmp148, argv
+	add	rax, 24	; _20,
+;             rand_seed = atoi(argv[3]);
+	mov	rax, QWORD PTR [rax]	; _21, *_20
+	mov	rdi, rax	;, _21
+	call	atoi@PLT	;
+	mov	DWORD PTR -52[rbp], eax	; rand_seed, tmp149
+;             str_to_search_in = (char *) malloc(MAX_SIZE * sizeof(char));
+	mov	edi, 300000	;,
+	call	malloc@PLT	;
+	mov	QWORD PTR -16[rbp], rax	; str_to_search_in, tmp150
+;             generate_random_string(argv[1], str_to_search_in, 30000, rand_seed);
+	mov	rax, QWORD PTR -112[rbp]	; tmp151, argv
+	add	rax, 8	; _22,
+;             generate_random_string(argv[1], str_to_search_in, 30000, rand_seed);
+	mov	rax, QWORD PTR [rax]	; _23, *_22
+	mov	edx, DWORD PTR -52[rbp]	; tmp152, rand_seed
+	mov	rsi, QWORD PTR -16[rbp]	; tmp153, str_to_search_in
+	mov	ecx, edx	;, tmp152
+	mov	edx, 30000	;,
+	mov	rdi, rax	;, _23
+	call	generate_random_string@PLT	;
+;             input_mode = 3;
+	mov	DWORD PTR -4[rbp], 3	; input_mode,
+	jmp	.L4	;
+.L10:
+;             printf("Unknown argument or in wrong position: %s\n", argv[1]);
+	mov	rax, QWORD PTR -112[rbp]	; tmp154, argv
+	add	rax, 8	; _24,
+;             printf("Unknown argument or in wrong position: %s\n", argv[1]);
+	mov	rax, QWORD PTR [rax]	; _25, *_24
+	mov	rsi, rax	;, _25
+	lea	rdi, .LC7[rip]	;,
+	mov	eax, 0	;,
+	call	printf@PLT	;
+;             return 1;
+	mov	eax, 1	; _47,
+	jmp	.L7	;
+.L4:
+;     output_file = NULL;
+	mov	QWORD PTR -40[rbp], 0	; output_file,
+;     if (input_mode == 1 && argc == 5) {
+	cmp	DWORD PTR -4[rbp], 1	; input_mode,
+	jne	.L12	;,
+;     if (input_mode == 1 && argc == 5) {
+	cmp	DWORD PTR -100[rbp], 5	; argc,
+	jne	.L12	;,
+;         file_path = argv[4];
+	mov	rax, QWORD PTR -112[rbp]	; tmp155, argv
+	mov	rax, QWORD PTR 32[rax]	; tmp156, MEM[(char * *)argv_59(D) + 32B]
+	mov	QWORD PTR -64[rbp], rax	; file_path, tmp156
+;         output_file = fopen(file_path, "w");
+	mov	rax, QWORD PTR -64[rbp]	; tmp157, file_path
+	lea	rsi, .LC8[rip]	;,
+	mov	rdi, rax	;, tmp157
+	call	fopen@PLT	;
+	mov	QWORD PTR -40[rbp], rax	; output_file, tmp158
+.L12:
+;     clocks_elapsed = 0;
+	mov	DWORD PTR -8[rbp], 0	; clocks_elapsed,
+;     passes = input_mode == 3 ? 4000 : 1;
+	cmp	DWORD PTR -4[rbp], 3	; input_mode,
+	jne	.L13	;,
+;     passes = input_mode == 3 ? 4000 : 1;
+	mov	eax, 4000	; iftmp.0_48,
+	jmp	.L14	;
+.L13:
+;     passes = input_mode == 3 ? 4000 : 1;
+	mov	eax, 1	; iftmp.0_48,
+.L14:
+;     passes = input_mode == 3 ? 4000 : 1;
+	mov	DWORD PTR -68[rbp], eax	; passes, iftmp.0_48
+;     for (i = 0; i < passes; i++) {
+	mov	DWORD PTR -20[rbp], 0	; i,
+;     for (i = 0; i < passes; i++) {
+	jmp	.L15	;
+.L21:
+;         start_time = clock();
+	call	clock@PLT	;
+	mov	QWORD PTR -80[rbp], rax	; start_time, tmp159
+;         found_substr_start = my_strstr(str_to_search_in, str_to_find);
+	mov	rdx, QWORD PTR -48[rbp]	; tmp160, str_to_find
+	mov	rax, QWORD PTR -16[rbp]	; tmp161, str_to_search_in
+	mov	rsi, rdx	;, tmp160
+	mov	rdi, rax	;, tmp161
+	call	my_strstr@PLT	;
+	mov	QWORD PTR -32[rbp], rax	; found_substr_start, tmp162
+;         end_time = clock();
+	call	clock@PLT	;
+	mov	QWORD PTR -88[rbp], rax	; end_time, tmp163
+;         clocks_elapsed += (end_time - start_time);
+	mov	rax, QWORD PTR -88[rbp]	; tmp164, end_time
+	mov	edx, eax	; _26, tmp164
+	mov	rax, QWORD PTR -80[rbp]	; tmp165, start_time
+	sub	edx, eax	; _28, _27
+;         clocks_elapsed += (end_time - start_time);
+	mov	eax, DWORD PTR -8[rbp]	; clocks_elapsed.1_29, clocks_elapsed
+	add	eax, edx	; _30, _28
+	mov	DWORD PTR -8[rbp], eax	; clocks_elapsed, _30
+;         while (found_substr_start != NULL) {
+	jmp	.L16	;
+.L20:
+;             if (input_mode == 0 || input_mode == 2 || input_mode == 1 && argc == 4) {
+	cmp	DWORD PTR -4[rbp], 0	; input_mode,
+	je	.L17	;,
+;             if (input_mode == 0 || input_mode == 2 || input_mode == 1 && argc == 4) {
+	cmp	DWORD PTR -4[rbp], 2	; input_mode,
+	je	.L17	;,
+;             if (input_mode == 0 || input_mode == 2 || input_mode == 1 && argc == 4) {
+	cmp	DWORD PTR -4[rbp], 1	; input_mode,
+	jne	.L18	;,
+;             if (input_mode == 0 || input_mode == 2 || input_mode == 1 && argc == 4) {
+	cmp	DWORD PTR -100[rbp], 4	; argc,
+	jne	.L18	;,
+.L17:
+;                 printf("%ld ", found_substr_start - str_to_search_in);
+	mov	rax, QWORD PTR -32[rbp]	; tmp166, found_substr_start
+	sub	rax, QWORD PTR -16[rbp]	; _31, str_to_search_in
+	mov	rsi, rax	;, _31
+	lea	rdi, .LC9[rip]	;,
+	mov	eax, 0	;,
+	call	printf@PLT	;
+	jmp	.L19	;
+.L18:
+;             } else if (input_mode == 1) {
+	cmp	DWORD PTR -4[rbp], 1	; input_mode,
+	jne	.L19	;,
+;                 fprintf(output_file, "%ld ", found_substr_start - str_to_search_in);
+	mov	rax, QWORD PTR -32[rbp]	; tmp167, found_substr_start
+	sub	rax, QWORD PTR -16[rbp]	; tmp167, str_to_search_in
+	mov	rdx, rax	; _32, tmp167
+	mov	rax, QWORD PTR -40[rbp]	; tmp168, output_file
+	lea	rsi, .LC9[rip]	;,
+	mov	rdi, rax	;, tmp168
+	mov	eax, 0	;,
+	call	fprintf@PLT	;
+.L19:
+;             start_time = clock();
+	call	clock@PLT	;
+	mov	QWORD PTR -80[rbp], rax	; start_time, tmp169
+;             found_substr_start = my_strstr(found_substr_start + 1, str_to_find);
+	mov	rax, QWORD PTR -32[rbp]	; tmp170, found_substr_start
+	lea	rdx, 1[rax]	; _33,
+;             found_substr_start = my_strstr(found_substr_start + 1, str_to_find);
+	mov	rax, QWORD PTR -48[rbp]	; tmp171, str_to_find
+	mov	rsi, rax	;, tmp171
+	mov	rdi, rdx	;, _33
+	call	my_strstr@PLT	;
+	mov	QWORD PTR -32[rbp], rax	; found_substr_start, tmp172
+;             end_time = clock();
+	call	clock@PLT	;
+	mov	QWORD PTR -88[rbp], rax	; end_time, tmp173
+;             clocks_elapsed += (end_time - start_time);
+	mov	rax, QWORD PTR -88[rbp]	; tmp174, end_time
+	mov	edx, eax	; _34, tmp174
+	mov	rax, QWORD PTR -80[rbp]	; tmp175, start_time
+	sub	edx, eax	; _36, _35
+;             clocks_elapsed += (end_time - start_time);
+	mov	eax, DWORD PTR -8[rbp]	; clocks_elapsed.2_37, clocks_elapsed
+	add	eax, edx	; _38, _36
+	mov	DWORD PTR -8[rbp], eax	; clocks_elapsed, _38
+.L16:
+;         while (found_substr_start != NULL) {
+	cmp	QWORD PTR -32[rbp], 0	; found_substr_start,
+	jne	.L20	;,
+;     for (i = 0; i < passes; i++) {
+	add	DWORD PTR -20[rbp], 1	; i,
+.L15:
+;     for (i = 0; i < passes; i++) {
+	mov	eax, DWORD PTR -20[rbp]	; tmp176, i
+	cmp	eax, DWORD PTR -68[rbp]	; tmp176, passes
+	jl	.L21	;,
+;     if (output_file != NULL) {
+	cmp	QWORD PTR -40[rbp], 0	; output_file,
+	je	.L22	;,
+;         fclose(output_file);
+	mov	rax, QWORD PTR -40[rbp]	; tmp177, output_file
+	mov	rdi, rax	;, tmp177
+	call	fclose@PLT	;
+.L22:
+;     if (!(input_mode == 1 && argc == 5)) { 
+	cmp	DWORD PTR -4[rbp], 1	; input_mode,
+	jne	.L23	;,
+;     if (!(input_mode == 1 && argc == 5)) { 
+	cmp	DWORD PTR -100[rbp], 5	; argc,
+	je	.L24	;,
+.L23:
+;         printf("\n");
+	mov	edi, 10	;,
+	call	putchar@PLT	;
+.L24:
+;     free(str_to_search_in);
+	mov	rax, QWORD PTR -16[rbp]	; tmp178, str_to_search_in
+	mov	rdi, rax	;, tmp178
+	call	free@PLT	;
+;     printf("Time elapsed: %ld microseconds\n", clocks_elapsed * 1000000 / CLOCKS_PER_SEC);
+	mov	eax, DWORD PTR -8[rbp]	; tmp179, clocks_elapsed
+	cdqe
+	mov	rsi, rax	;, _39
+	lea	rdi, .LC10[rip]	;,
+	mov	eax, 0	;,
+	call	printf@PLT	;
+;     return 0;
+	mov	eax, 0	; _47,
+.L7:
+; }
+	leave	
+	ret	

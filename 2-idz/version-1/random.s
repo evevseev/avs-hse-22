@@ -1,118 +1,110 @@
 	.intel_syntax noprefix
 	.text
-	.globl	random_fill_array
-	.type	random_fill_array, @function
+	.globl	generate_random_string
+	.type	generate_random_string, @function
+generate_random_string:
+	endbr64	
+	push	rbp
+	mov	rbp, rsp
 
-	# ## random_fill_array()
-	# ### Локальные переменные
-	# - DWORD -4[rbp]     - i
-	# - QWORD -24[rbp]	- &array
-	# - DWORD -28[rbp]    - size
-	# - DWORD -32[rbp]	- seed
-	# ### Параметры и возвращаемый результат
-	# - rdi - &array
-	# - esi - size
-	# - edx - seed
-	# - rax (return) - array_size
+	sub	rsp, 48
+	mov	QWORD PTR -24[rbp], rdi	; < substr
+	mov	QWORD PTR -32[rbp], rsi	; < str
+	mov	DWORD PTR -36[rbp], edx	; < size
+	mov	DWORD PTR -40[rbp], ecx	; < seed
 
-random_fill_array:
-	endbr64							# < ситемная штука
-	push	rbp						# / стандартный пролог
-	mov	rbp, rsp					# \	
-	sub	rsp, 32						# < выделяем стек
+	mov	eax, DWORD PTR -40[rbp]	; //
+	mov	edi, eax				; |\ seed
+	call	srand@PLT			; \ srand(seed)
+  
+	mov	rax, QWORD PTR -24[rbp]		; / / substr
+	mov	rdi, rax					; | \ tmp101
+	call	strlen@PLT				; |
+	mov	DWORD PTR -12[rbp], eax		; \ substr_size = strlen(substr);
 
-	mov	QWORD PTR -24[rbp], rdi		# < &array
-	mov	DWORD PTR -28[rbp], esi		# < size
-	mov	DWORD PTR -32[rbp], edx		# < seed
+	mov	DWORD PTR -8[rbp], 0	; < generated_size = 0;
 
-	# srand()
-	# rdi - seed
-	mov	eax, DWORD PTR -32[rbp]		# / /1ый аргумент, seed
-	mov	edi, eax					# | \
-	call	srand@PLT				# \ srand(seed)
+	jmp	.L2	; < while(generated_size < size - 1)
+.L6:
+	call	rand@PLT	; /|
+	and	eax, 1			; ||
+	test	eax, eax	; |\ if (rand() % 2 == 0) {
+	jne	.L3				; \ if not goto L3
 
-	mov	DWORD PTR -4[rbp], 0		# < i = 0
-	jmp	.L2							# < goto L2 (loop begining)
+	mov	DWORD PTR -4[rbp], 0	; i = 0
+	jmp	.L4	; for (i = 0; i < substr_size && generated_size < size; i++)
+.L5:
+	mov	eax, DWORD PTR -4[rbp]	; //
+	movsx	rdx, eax			; |\ rdx = i
+	mov	rax, QWORD PTR -24[rbp]	; |/.
+	add	rax, rdx				; |\rax = substr + i
 
-# Первый цикл
+	mov	edx, DWORD PTR -8[rbp]	; // 
+	movsx	rcx, edx			; |\ rcx = generated_size
+	mov	rdx, QWORD PTR -32[rbp]	; |/
+	add	rdx, rcx				; \\ rdx = str + generated_size
+
+	movzx	eax, BYTE PTR [rax]	; /
+	mov	BYTE PTR [rdx], al		; \ str[generated_size] = substr[i];
+
+	add	DWORD PTR -8[rbp], 1	; generated_size++;
+	add	DWORD PTR -4[rbp], 1	; i++;
+.L4:
+	mov	eax, DWORD PTR -4[rbp]	; / / i
+	cmp	eax, DWORD PTR -12[rbp]	; | \ i >=? substr_size
+	jge	.L2						; \  if so goto L2
+
+	mov	eax, DWORD PTR -8[rbp]	; / /
+	cmp	eax, DWORD PTR -36[rbp]	; | \ generated_size <? size
+	jl	.L5						; | if so goto L5
+	jmp	.L2						; \ else goto L2
 .L3:
-	# rand()
-	# rax - result
-	call	rand@PLT				# /
-	neg	eax							# | edx = -rand()
-	mov	edx, eax					# \
+	call	rand@PLT			; /
+	mov	edx, eax				; \ eax = rand(),
 
-	mov	eax, DWORD PTR -4[rbp]		# / eax = i;
-	cdqe							# \ системный вызов, преобразует DWORD в QWORD
+	movsx	rax, edx			; /
+	imul	rax, rax, 715827883	; | а 
+	shr	rax, 32					; | компилятор
+	mov	ecx, eax				; | сам 
+	sar	ecx, 4					; | знает
+	mov	eax, edx				; | что тут проиходит
+	sar	eax, 31					; | ?
+	sub	ecx, eax				; |
+	mov	eax, ecx				; |
+	add	eax, eax				; |
+	add	eax, ecx				; |
+	sal	eax, 5					; |
+	mov	ecx, edx				; |
+	sub	ecx, eax				; | 
+	mov	eax, ecx				; |
+	add	eax, 32					; \ eax = rand() % (128 - 32) + 32
 
-	lea	rcx, 0[0+rax*4]				# < rcx - вычисляем смещение в массиве для iого элемента
+	mov	BYTE PTR -13[rbp], al	; ch = eax
 
-	mov	rax, QWORD PTR -24[rbp]		# < rax = &array
-	add	rcx, rax					# < rcx = &array[i]
-	movsx	rax, edx				# < rax = edx
+	cmp	BYTE PTR -13[rbp], 0	; / if(ch != '\0')
+	je	.L2						; \ if not, goto L2
 
-	imul	rax, rax, 1374389535	# /
-	shr	rax, 32						# |	
-	mov	esi, eax					# |
-	sar	esi, 5						# |
-	mov	eax, edx					# |
-	sar	eax, 31						# |
-	sub	esi, eax					# |
-	mov	eax, esi					# |
-	imul	eax, eax, 100			# |
-	sub	edx, eax					# |
-	mov	eax, edx					# \ eax = -rand() % 100
+	mov	eax, DWORD PTR -8[rbp]		; // 
+	movsx	rdx, eax				; |\ rdx = generated_size
+	mov	rax, QWORD PTR -32[rbp]		; | rax = str
+	add	rdx, rax					; | rdx = str + generated_size
+	movzx	eax, BYTE PTR -13[rbp]	; |/ eax = ch
+	mov	BYTE PTR [rdx], al			; \\ str[generated_size] = ch;
+              
+	add	DWORD PTR -8[rbp], 1	; < generated_size++;
+.L2:
 
-	mov	DWORD PTR [rcx], eax		# < array[i] = eax
-	add	DWORD PTR -4[rbp], 1		# < i++
+	mov	eax, DWORD PTR -36[rbp]	; // 
+	sub	eax, 1					; |\ size - 1
+	cmp	DWORD PTR -8[rbp], eax	; | while(generated_size < size - 1) {
+	jl	.L6						; \ goto L6
 
-.L2:								#
-	mov	edx, DWORD PTR -28[rbp]		# / 
-	mov	eax, edx					# | 
-	add	eax, eax					# | eax = size * 3
-	add	eax, edx					# \
+	mov	eax, DWORD PTR -8[rbp]	; // generated_size
+	movsx	rdx, eax			; |\
+	mov	rax, QWORD PTR -32[rbp]	; |/
+	add	rax, rdx				; |\ str + generated_size
+	mov	BYTE PTR [rax], 0		; \ str[generated_size] = '\0';
 
-	lea	edx, 3[rax]					# /
-	test	eax, eax				# | 
-	cmovs	eax, edx				# | 
-	sar	eax, 2						# \ eax = (size * 3 + 3) / 4
-
-	cmp	DWORD PTR -4[rbp], eax		# / i < (eaz = (size * 3 + 3) / 4)?
-	jl	.L3							# | goto L3
-	jmp	.L4							# \ else goto L4
-
-# Второй цикл
-.L5:								# 
-	# rand()
-	# rax - result
-	call	rand@PLT				# /
-	movsx	rdx, eax				# | rdx = rand()
-	imul	rdx, rdx, 1374389535	# |
-	shr	rdx, 32						# |
-	mov	ecx, edx					# |
-	sar	ecx, 6						# |
-	cdq								# |
-	sub	ecx, edx					# |
-	mov	edx, ecx					# |
-	imul	edx, edx, 200			# |
-	sub	eax, edx					# |
-	mov	edx, eax					# \ edx = -rand() % 200
-
-	mov	eax, DWORD PTR -4[rbp]		# / eax = i
-	cdqe							# \ системный вызов, преобразует DWORD в QWORD
-	
-	lea	rcx, 0[0+rax*4]				# < rcx - вычисляем смещение в массиве для iого элемента
-	mov	rax, QWORD PTR -24[rbp]		# /
-	add	rax, rcx					# \ rax = &array[i]
-
-	sub	edx, 100					# < edx = (edx = -rand() % 200) - 100
-	mov	DWORD PTR [rax], edx		# < array[i] = edx
-	add	DWORD PTR -4[rbp], 1		# < i++
-
-.L4:								#
-	mov	eax, DWORD PTR -4[rbp]		# / if i < size
-	cmp	eax, DWORD PTR -28[rbp]		# |
-	jl	.L5							# \ goto L5 
-	mov	eax, DWORD PTR -28[rbp]		# < else eax = size
-	leave							# /
-	ret								# \ return size
+	nop	
+	leave	
+	ret	

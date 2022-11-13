@@ -1,227 +1,91 @@
 	.intel_syntax noprefix
 	.text
 	.section	.rodata
-# Ошибки и формат ввода
 .LC0:
 	.string	"r"
 .LC1:
-	.string	"%d"
+	.string	"File is too big"
 .LC2:
-	.string	"n must be in range [1, %d]\n"
+	.string	"%c"
 	.text
-	.globl	read_array_from_file
-	.type	read_array_from_file, @function
+	.globl	read_string_from_file
+	.type	read_string_from_file, @function
+read_string_from_file:
+	endbr64	
+	push	rbp	
+	mov	rbp, rsp
 
-	# ## read_array_from_file()
-	# ### Локальные переменные
-	# - DWORD -4[rbp]     - i
-	# - QWORD -16[rbp]    - &in_file
-	# - DWORD -20[rbp]    - n
-	# - QWORD -40[rbp]    - &array
-	# - QWORD -48[rbp]    - &filepath
-	# - DWORD -52[rbp]    - max_size
-	# ### Параметры и возвращаемый результат
-	# - rdi - &array
-	# - rsi - &filepath
-	# - edx - max_size
-	# - rax (return) - array_size
-read_array_from_file:
-	endbr64
-	
-	push	rbp	 					# /
-	mov	rbp, rsp					# \ стандартный пролог
+	sub	rsp, 48
+	mov	QWORD PTR -40[rbp], rdi	; < file_path
+	mov	DWORD PTR -44[rbp], esi	; < max_size
 
-	sub	rsp, 64						# < выделение памяти для массива
+;    
+	mov	rax, QWORD PTR -40[rbp]	; / rax = file_path
+	lea	rsi, .LC0[rip]			; | "r"
+	mov	rdi, rax				; | file_path
+	call	fopen@PLT			; |
+	mov	QWORD PTR -16[rbp], rax	; \ file = fopen(file_path, "r");
 
-	mov	QWORD PTR -40[rbp], rdi		# / сохранение аргументов, &array
-	mov	QWORD PTR -48[rbp], rsi		# | &filepath
-	mov	DWORD PTR -52[rbp], edx		# \ max_size
-	
-	# fopen()
-	# rdi - &filepath
-	# rsi - mode
-	# rax - FILE*
-	mov	rax, QWORD PTR -48[rbp]		# / 
-	lea	rsi, .LC0[rip]				# | mode
-	mov	rdi, rax					# | rdi = filepath
-	call	fopen@PLT				# | открытие файла
-	mov	QWORD PTR -16[rbp], rax		# \ in_file = fopen(filepath, mode)
+	mov	rax, QWORD PTR -16[rbp]	; / rax = file
+	mov	edx, 2					; | SEEK_END
+	mov	esi, 0					; |
+	mov	rdi, rax				; | rdi = file
+	call	fseek@PLT			; \
 
-	# __isoc99_fscanf()
-	# rdi - FILE*
-	# rsi - format
-	# rdx - where to read
-	# rax = 0 (calling convention)
-	lea	rdx, -20[rbp]				# / &n
-	mov	rax, QWORD PTR -16[rbp]		# |
-	lea	rsi, .LC1[rip]				# | подсказка
-	mov	rdi, rax					# |
-	mov	eax, 0						# |
-	call	__isoc99_fscanf@PLT		# |
-	mov	eax, DWORD PTR -20[rbp]		# \ fscanf(file, "%d", &n)
+	mov	rax, QWORD PTR -16[rbp]	; / file
+	mov	rdi, rax				; | file
+	call	ftell@PLT			; |
+	mov	QWORD PTR -24[rbp], rax	; \file_size = ftell(file);
+;    
+	mov	rax, QWORD PTR -16[rbp]	; / file
+	mov	edx, 0					; |
+	mov	esi, 0					; |
+	mov	rdi, rax				; | file
+	call	fseek@PLT			; \ fseek(file, 0, SEEK_SET);
 
-	test	eax, eax				# / if (n < 0)
-	jle	.L2							# \ goto .L2
+	mov	rax, QWORD PTR -24[rbp]	; | /
+	mov	rdi, rax				; |	\ file_size
+	call	malloc@PLT			; |
+	mov	QWORD PTR -32[rbp], rax	; \ str = (char *) malloc(file_size * sizeof(char));
+	mov	DWORD PTR -4[rbp], 0	; < i = 0;
+	mov	DWORD PTR -8[rbp], 0 	; < eof_flag = 0,
+	jmp	.L2	; < while (eof_flag != EOF)
+.L4:
+	mov	eax, DWORD PTR -4[rbp]	; / i
+	cmp	eax, DWORD PTR -44[rbp]	; | max_size
+	jl	.L3						; \ if(i >= max_size)
 
-	mov	eax, DWORD PTR -20[rbp]		# / if (max_size >= n)
-	cmp	DWORD PTR -52[rbp], eax		# | 
-	jge	.L3							# \ goto L3
+	lea	rdi, .LC1[rip]	; / 
+	call	puts@PLT	; \ printf("File is too big\n");
+        
+	mov	rax, QWORD PTR -16[rbp]	; // rdi = file
+	mov	rdi, rax				; |\
+	call	fclose@PLT			; \ fclose(file);
 
-.L2:			
-	# printf()
-	# rsi - value
-	# rdi - format
-	# eax - count of xmm values 					# < exit(1)
-	mov	eax, DWORD PTR -52[rbp]		# / max_size
-	mov	esi, eax					# |
-	lea	rdi, .LC2[rip]				# | формат
-	mov	eax, 0						# |
-	call	printf@PLT				# \ printf("n must be in range [1, %d]\n", max_size)
-
-	# fclose()
-	# rdi - FILE*
-	mov	rax, QWORD PTR -16[rbp]		# / Закрытие файла
-	mov	rdi, rax					# |
-	call	fclose@PLT				# \
-	
-	# exit()
-	# rdi - status code
-	mov	edi, 1						# / exit(1)
-	call	exit@PLT				# \
-
+	mov	edi, 5			; /
+	call	exit@PLT	; \ exit(5);
 .L3:
-	mov	DWORD PTR -4[rbp], 0		# < i = 0
-	jmp	.L4							# < goto цикл ввода
+;        
+	mov	eax, DWORD PTR -4[rbp]	; // i
+	movsx	rdx, eax			; |\ rdx = i
+	mov	rax, QWORD PTR -32[rbp]	; | str
+	add	rdx, rax				; | rdx = str + i
+	mov	rax, QWORD PTR -16[rbp]	; | file
+	lea	rsi, .LC2[rip]			; |
+	mov	rdi, rax				; |
+	mov	eax, 0					; |
+	call	__isoc99_fscanf@PLT	; |
+	mov	DWORD PTR -8[rbp], eax	; \ eof_flag = fscanf(file, "%c", &str[i]);
 
-.L5:								# < цикл ввода
-	mov	eax, DWORD PTR -4[rbp]		# / rax = i
-	cdqe							# \
+	add	DWORD PTR -4[rbp], 1	; < i++;
+.L2:
+	cmp	DWORD PTR -8[rbp], -1	; / while (eof_flag != EOF) 
+	jne	.L4						; \ goto .L4
 
-	lea	rdx, 0[0+rax*4]				# /
-	mov	rax, QWORD PTR -40[rbp]		# | 
-	add	rdx, rax					# \ rdx = &array[i]
+	mov	rax, QWORD PTR -16[rbp]	; / file
+	mov	rdi, rax				; |
+	call	fclose@PLT			; \	fclose(file);
 
-	# __isoc99_fscanf()
-	# rdi - FILE*
-	# rsi - format
-	# rdx - where to read
-	# rax = 0 (calling convention)
-	mov	rax, QWORD PTR -16[rbp]		# / FILE 
-	lea	rsi, .LC1[rip]				# | формат
-	mov	rdi, rax					# |
-	mov	eax, 0						# | 
-	call	__isoc99_fscanf@PLT		# \ fscanf(file, "%d", &array[i])
-
-	add	DWORD PTR -4[rbp], 1		# < i++
-
-.L4:								# < условие цикла
-	mov	eax, DWORD PTR -20[rbp]		# /
-	cmp	DWORD PTR -4[rbp], eax		# | if (i < n)
-	jl	.L5							# \ goto в цикл ввода
-
-	# fclose()
-	# rdi - FILE*
-	mov	rax, QWORD PTR -16[rbp]		# /
-	mov	rdi, rax					# | Закрытие файла
-	call	fclose@PLT				# \
-
-	mov	eax, DWORD PTR -20[rbp]		# / return n
-	leave							# |
-	ret								# \
-	.size	read_array_from_file, .-read_array_from_file
-	.section	.rodata
-
-# ###########
-.LC3:
-	.string	"w"
-.LC4:
-	.string	"%d "
-	.text
-	.globl	save_array_to_file
-	.type	save_array_to_file, @function
-	
-	# ## save_array_to_file()
-	# ### Локальные переменные
-	# - QWORD -16[rbp]    - &out_file
-	# - QWORD -24[rbp]    - &array
-	# - DWORD -28[rbp]    - size
-	# - QWORD -40[rbp]    - &filepath
-	# ### Параметры и возвращаемый результат
-	# - rdi - &array
-	# - rsi - size
-	# - edx - &filepath
-save_array_to_file:
-	endbr64							#
-
-	push	rbp						# /
-	mov	rbp, rsp					# \ стандартный пролог
-	
-	sub	rsp, 48						# / выделение памяти
-	
-	mov	QWORD PTR -24[rbp], rdi		# / сохранение аргументов, &array
-	mov	DWORD PTR -28[rbp], esi		# | size
-	mov	QWORD PTR -40[rbp], rdx		# \ filepath
-	
-	# fopen()
-	# rdi - &filepath
-	# rsi - mode
-	# rax - FILE*
-	mov	rax, QWORD PTR -40[rbp]		# / 
-	lea	rsi, .LC3[rip]				# |
-	mov	rdi, rax					# |
-	call	fopen@PLT				# |
-	mov	QWORD PTR -16[rbp], rax		# \ out_file = fopen(filepath, "w")
-	
-	# printf()
-	# rsi - value
-	# rdi - format
-	# eax - count of xmm values 
-	mov	edx, DWORD PTR -28[rbp]		# / edx = size
-	mov	rax, QWORD PTR -16[rbp]		# | 
-	lea	rsi, .LC4[rip]				# | формат
-	mov	rdi, rax					# | FILE
-	mov	eax, 0						# | 
-	call	fprintf@PLT				# \ fprintf(FILE, "%d ", size)
-	
-	mov	DWORD PTR -4[rbp], 0		# / i = 0
-	jmp	.L8							# \ goto цикл вывода
-
-.L9:
-	mov	eax, DWORD PTR -4[rbp]		# / 
-	cdqe							# | 
-	lea	rdx, 0[0+rax*4]				# |
-	mov	rax, QWORD PTR -24[rbp]		# |
-	add	rax, rdx					# \ rax = &array[i]
-	
-	mov	edx, DWORD PTR [rax]		# / edx = array[i]
-	mov	rax, QWORD PTR -16[rbp]		# | 
-	lea	rsi, .LC4[rip]				# |
-	mov	rdi, rax					# | FILE
-	mov	eax, 0						# |
-	call	fprintf@PLT				# \ fprintf(FILE, "%d ", array[i])
-	
-	add	DWORD PTR -4[rbp], 1		# < i++
-
-.L8: 								# < условие цикла
-	mov	eax, DWORD PTR -4[rbp]		# /
-	cmp	eax, DWORD PTR -28[rbp]		# | if (i < size)
-	jl	.L9							# \  goto цикл вывода
-	
-	# fputc()
-	# rdi - FILE*
-	# rsi - char
-	mov	rax, QWORD PTR -16[rbp]		# / FILE
-	mov	rsi, rax					# | 
-	mov	edi, 10						# |
-	call	fputc@PLT				# \ перенос строки
-	
-	# fclose()
-	# rdi - FILE*
-	mov	rax, QWORD PTR -16[rbp]		# /
-	mov	rdi, rax					# |
-	call	fclose@PLT				# \ fclose(FILE)
-	
-	nop								# 
-
-	leave							# / return 
-	ret								# \
+	mov	rax, QWORD PTR -32[rbp]	; <  return str;
+	leave	
+	ret	
