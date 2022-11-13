@@ -5,7 +5,7 @@
 # ## my_strstr()
 # ### Локальные переменные
 # - DWORD -4[rbp]  - i
-# - DWORD -8[rbp]  - j
+# - DWORD -8[rbp]  - jrbp
 # - DWORD -12[rbp] - k
 # - QWORD -24[rbp] - str
 # - QWORD -32[rbp] - substr

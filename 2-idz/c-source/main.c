@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
     }
 
     clocks_elapsed = 0;
-    passes = input_mode == 3 ? 4000 : 1;
+    passes = input_mode == 3 ? 40000 : 1;
 
     for (i = 0; i < passes; i++) {
         start_time = clock();
