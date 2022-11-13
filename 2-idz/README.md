@@ -108,9 +108,9 @@ Running 300 tests of random on each executable...
 
 Running 300 tests on each executable...
 ✓ c-source/a.out:       Console Tests passed
-✓ version-1/a.out: Console Tests passed
+✓ version-1/a.out:      Console Tests passed
 ✓ c-source/a.out:       File Tests passed
-✓ version-1/a.out: File Tests passed
+✓ version-1/a.out:      File Tests passed
 ```
 
 # Mark 5

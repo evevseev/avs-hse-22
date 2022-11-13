@@ -49,7 +49,7 @@ def test_random(exe: str, tests_qnt: int) -> bool:
     for i in range(tests_qnt):
         substr = generate_random_string(random.randint(1, 40))
 
-        output =  run_test(exe, "", [substr, "-random", ])
+        output =  run_test(exe, "", [substr, "-random", str(random.randint(1, 23423)), str(random.randint(1, 23423))])
         generated_data = output.split("\n")[0]
         answer = [int(x) for x in output.split("\n")[1].split()]
 
@@ -133,20 +133,20 @@ if __name__ == "__main__":
     tests_qnt = 300
     test_data = list([generate_test_data() for _ in range(tests_qnt)])
 
-    # print(f"\nRunning {tests_qnt} tests of random on each executable...")
-    # for exe in executables:
-    #     if test_random(exe, tests_qnt):
-    #         print(f"{bcolors.OKGREEN}✓ {exe}:\tRandom Tests Passed{bcolors.ENDC}")
-    #     else:
-    #         print(f"{bcolors.FAIL}X {exe}:\t Random Tests Failed{bcolors.ENDC}")
-    #         exit(1)
+    print(f"\nRunning {tests_qnt} tests of random on each executable...")
+    for exe in executables:
+        if test_random(exe, tests_qnt):
+            print(f"{bcolors.OKGREEN}✓ {exe}:\tRandom Tests Passed{bcolors.ENDC}")
+        else:
+            print(f"{bcolors.FAIL}X {exe}:\t Random Tests Failed{bcolors.ENDC}")
+            exit(1)
 
-    # print(f"\nRunning {tests_qnt} tests on each executable...")
-    # for exe in executables:
-    #     if not tests(exe, test_data):
-    #         print(f"{bcolors.FAIL}X {exe}:\tConsole Tests failed{bcolors.ENDC}")
-    #     else:
-    #         print(f"{bcolors.OKGREEN}✓ {exe}:\tConsole Tests passed{bcolors.ENDC}")
+    print(f"\nRunning {tests_qnt} tests on each executable...")
+    for exe in executables:
+        if not tests(exe, test_data):
+            print(f"{bcolors.FAIL}X {exe}:\tConsole Tests failed{bcolors.ENDC}")
+        else:
+            print(f"{bcolors.OKGREEN}✓ {exe}:\tConsole Tests passed{bcolors.ENDC}")
 
     for exe in executables:
         if not tests(exe, test_data, file=True):
