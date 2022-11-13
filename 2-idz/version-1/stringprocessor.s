@@ -2,6 +2,18 @@
 	.text
 	.globl	my_strstr
 	.type	my_strstr, @function
+# ## my_strstr()
+# ### Локальные переменные
+# - DWORD -4[rbp]  - i
+# - DWORD -8[rbp]  - j
+# - DWORD -12[rbp] - k
+# - QWORD -24[rbp] - str
+# - QWORD -32[rbp] - substr
+
+# ### Параметры и возвращаемый результат
+# - rdi - str
+# - rsi - substr
+# - rax (return) - start of substr in str or NULL if not found
 my_strstr:
 	endbr64	
 	push	rbp

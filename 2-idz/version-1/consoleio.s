@@ -8,13 +8,23 @@
 	.text
 	.globl	read_string_from_console
 	.type	read_string_from_console, @function
+# ## read_string_from_console()
+# ### Локальные переменные
+# - DWORD -4[rbp]  - i
+# - DWORD -8[rbp]  - eof_flag 
+# - QWORD -16[rbp] - *str
+# - DWORD -20[rbp] - max_size
+
+# ### Параметры и возвращаемый результат
+# - edi - max_size
+# - rax (return) - start of the string
 read_string_from_console:
 	endbr64	
 	push	rbp	
 	mov	rbp, rsp	
 	sub	rsp, 32	
 
-	mov	DWORD PTR -20[rbp], edi	# /	max_size
+	mov	DWORD PTR -20[rbp], edi	# /	max_size = edi
 	mov	eax, DWORD PTR -20[rbp]	# | / rdi =max_size
 	cdqe						# | |
 	mov	rdi, rax				# | \
@@ -31,6 +41,8 @@ read_string_from_console:
 	cmp	eax, DWORD PTR -20[rbp]	# | i ?? max_size
 	jl	.L3						# \ if(i < max_size) goto .L3
        
+	# puts()
+	# rdi - string
 	lea	rdi, .LC0[rip]	# / 
 	call	puts@PLT	# \ printf("String is too big\n")#
         

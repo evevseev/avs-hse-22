@@ -32,6 +32,28 @@
 	.text
 	.globl	main
 	.type	main, @function
+
+# ## main()
+# ### Локальные переменные
+# - DWORD -4[rbp]  - input_mode
+# - DWORD -8[rbp]  - clocks_elapsed
+# - QWORD -16[rbp] - *str_to_search_in
+# - DWORD -20[rbp] - i
+# - QWORD -32[rbp] - *found_substr_start
+# - QWORD -40[rbp] - *output_file
+# - QWORD -48[rbp] - *str_to_find
+# - DWORD -52[rbp] - rand_seed
+# - DWORD -56[rbp] - string_size_to_generate
+# - QWORD -64[rbp] - file_path
+# - DWORD -68[rbp] - passes
+# - QWORD -80[rbp] - start_time
+# - QWORD -88[rbp] - end_time
+
+# ### Параметры и возвращаемый результат
+# - edi - argc
+# - rsi - argc
+# - rax (return) - exit code
+
 main:
 	endbr64	
 	push	rbp	
@@ -44,6 +66,8 @@ main:
 	cmp	DWORD PTR -100[rbp], 1	# if (argc < 2)
 	jg	.L2						# goto .L2
 
+	# puts()
+	# rdi - string
 	lea	rdi, .LC0[rip] 	# /
 	call	puts@PLT	# \ printf("String to find was not provided\n")
 
@@ -58,6 +82,10 @@ main:
 	cmp	DWORD PTR -100[rbp], 2	# / if (argc == 2) 
 	jne	.L3						# \ if not, goto L3
 
+	# read_string_from_console()
+	# edi - argc
+	# rsi - argc
+	# rax (return) - exit code
 	mov	edi, 300000							# /
 	call	read_string_from_console@PLT	# |
 	mov	QWORD PTR -16[rbp], rax				# \ str_to_search_in = read_string_from_console(MAX_SIZE)#
@@ -66,6 +94,10 @@ main:
 	jmp	.L4	#
 .L3:
 
+	# printf()
+	# rsi - value
+	# rdi - format
+	# eax - count of xmm values 
 	mov	rax, QWORD PTR -112[rbp]	# //argv
 	add	rax, 16						# ||
 	mov	rax, QWORD PTR [rax]		# |\ rax = argv[2]
@@ -77,7 +109,11 @@ main:
 
 	cmp	DWORD PTR -100[rbp], 3		# / if (argc > 3)
 	jg	.L6							# \ if so, goto 3
-         
+    
+	# printf()
+	# rsi - value
+	# rdi - format
+	# eax - count of xmm values 
 	mov	rax, QWORD PTR -112[rbp]	# / /
 	mov	rax, QWORD PTR [rax]		# | | rsi = argv[0]
 	mov	rsi, rax					# | \
@@ -92,7 +128,11 @@ main:
 	mov	rax, QWORD PTR 24[rax]		# |
 	mov	QWORD PTR -64[rbp], rax		# \ file_path = argv[3]
 
-	mov	rax, QWORD PTR -64[rbp]			# / 
+	# read_string_from_file()
+	# rdi - file_path
+	# esi - max_size
+	# rax (return) - pointer to the string
+ 	mov	rax, QWORD PTR -64[rbp]			# / 
 	mov	esi, 300000						# |
 	mov	rdi, rax						# | rdi = file_path
 	call	read_string_from_file@PLT	# | 
@@ -101,6 +141,10 @@ main:
 	mov	DWORD PTR -4[rbp], 1	# <  input_mode = 1
 	jmp	.L4	
 .L5:
+	# printf()
+	# rsi - value
+	# rdi - format
+	# eax - count of xmm values 
 	mov	rax, QWORD PTR -112[rbp]	# // 
 	add	rax, 16						# ||
 	mov	rax, QWORD PTR [rax]		# |\ rax = argv[2]
@@ -110,6 +154,10 @@ main:
 	test	eax, eax				# |/ eax == 0?
 	jne	.L8							# \\ if not, goto L8
 
+	# printf()
+	# rsi - value
+	# rdi - format
+	# eax - count of xmm values 
 	cmp	DWORD PTR -100[rbp], 4	# if (argc < 5)
 	jg	.L9						# if so goto L9             
 	mov	rax, QWORD PTR -112[rbp]	# /
@@ -122,6 +170,9 @@ main:
 	mov	eax, 1	# /
 	jmp	.L7		# \ return 1
 .L9:      
+	# atoi()
+	# rdi - string
+	# rax (return) - int value
 	mov	rax, QWORD PTR -112[rbp]	# //
 	add	rax, 32						# ||
 	mov	rax, QWORD PTR [rax]		# ||
@@ -129,6 +180,9 @@ main:
 	call	atoi@PLT				# |
 	mov	DWORD PTR -56[rbp], eax		# \ string_size_to_generate = atoi(argv[4])
 
+	# atoi()
+	# rdi - string
+	# rax (return) - int value
 	mov	rax, QWORD PTR -112[rbp]	# //
 	add	rax, 24						# ||
 	mov	rax, QWORD PTR [rax]		# ||
@@ -142,6 +196,11 @@ main:
 	call	malloc@PLT			# |
 	mov	QWORD PTR -16[rbp], rax	# \ str_to_search_in = (char *) malloc(string_size_to_generate * sizeof(char))
 
+	# generate_random_string()
+	# rdi - substr
+	# rsi - str
+	# edx - size
+	# ecx - seed
 	mov	rax, QWORD PTR -112[rbp]		# //
 	add	rax, 8							# ||
 	mov	rax, QWORD PTR [rax]			# |\ rax = argv[1]
@@ -151,6 +210,8 @@ main:
 	mov	rdi, rax						# | rdi = rax
 	call	generate_random_string@PLT	# \ generate_random_string(argv[1], str_to_search_in, string_size_to_generate, rand_seed)#
 
+	# puts()
+	# rdi - string
 	mov	rax, QWORD PTR -16[rbp]	# //
 	mov	rdi, rax				# |\ rdi = str_to_search_in
 	call	puts@PLT			# \ puts(str_to_search_in)
@@ -158,6 +219,10 @@ main:
 	mov	DWORD PTR -4[rbp], 2	# < input_mode = 2
 	jmp	.L4	
 .L8:
+	# printf()
+	# rsi - value
+	# rdi - format
+	# eax - count of xmm values 
 	mov	rax, QWORD PTR -112[rbp]	# // 
 	add	rax, 16						# || 
 	mov	rax, QWORD PTR [rax]		# |\ rax = argv[2]
@@ -170,7 +235,11 @@ main:
 
 	cmp	DWORD PTR -100[rbp], 3	# / if (argc > 3),
 	jg	.L11					# \ gotot L11
-              
+
+	# printf()
+	# rsi - value
+	# rdi - format
+	# eax - count of xmm values 
 	mov	rax, QWORD PTR -112[rbp]	# //
 	mov	rax, QWORD PTR [rax]		# ||
 	mov	rsi, rax					# |\ rsi = argv[0]
@@ -180,7 +249,10 @@ main:
 
 	mov	eax, 1	# / return 1
 	jmp	.L7		# \
-.L11:          
+.L11:     
+	# atoi()
+	# rdi - string
+	# rax (return) - int value     
 	mov	rax, QWORD PTR -112[rbp]		# //
 	add	rax, 24							# ||
 	mov	rax, QWORD PTR [rax]			# ||
@@ -190,8 +262,13 @@ main:
 
 	mov	edi, 300000						# /
 	call	malloc@PLT					# |
-	mov	QWORD PTR -16[rbp], rax			# \ str_to_search_in = (char *) malloc(MAX_SIZE * sizeof(char))#
-#             
+	mov	QWORD PTR -16[rbp], rax			# \ str_to_search_in = (char *) malloc(MAX_SIZE * sizeof(char))
+	
+	# generate_random_string()
+	# rdi - substr
+	# rsi - str
+	# edx - size
+	# ecx - seed
 	mov	rax, QWORD PTR -112[rbp]		# //
 	add	rax, 8							# ||
 	mov	rax, QWORD PTR [rax]			# |\ rax = argv[1]
@@ -204,6 +281,10 @@ main:
 	mov	DWORD PTR -4[rbp], 3	# input_mode = 3
 	jmp	.L4	
 .L10:
+	# printf()
+	# rsi - value
+	# rdi - format
+	# eax - count of xmm values 
 	mov	rax, QWORD PTR -112[rbp] # / / argv
 	add	rax, 8					 # | | argv[1]
 	mov	rax, QWORD PTR [rax]	 # | | 
@@ -248,9 +329,14 @@ main:
 	mov	DWORD PTR -20[rbp], 0	# < i = 0
 	jmp	.L15					# < goto for (i = 0; i < passes; i++)
 .L21:
+	# clock()
 	call	clock@PLT			# /
 	mov	QWORD PTR -80[rbp], rax	# \ tart_time = clock()
 
+	# my_strstr()
+	# rdi - str
+	# rsi - substr
+	# rax (return) - start of substr in str or NULL if not found
 	mov	rdx, QWORD PTR -48[rbp]	# / 
 	mov	rax, QWORD PTR -16[rbp]	# | 
 	mov	rsi, rdx				# | str_to_find
@@ -258,6 +344,7 @@ main:
 	call	my_strstr@PLT		# |
 	mov	QWORD PTR -32[rbp], rax	# \found_substr_start = my_strstr(str_to_search_in, str_to_find)
 
+	# clock()
 	call	clock@PLT			# /
 	mov	QWORD PTR -88[rbp], rax	# \ end_time = clock()
 
@@ -283,7 +370,11 @@ main:
 
 	cmp	DWORD PTR -100[rbp], 4	# argc == 4
 	jne	.L18					# if not, goto L18
-.L17:             
+.L17:    
+	# printf()
+	# rsi - value
+	# rdi - format
+	# eax - count of xmm values          
 	mov	rax, QWORD PTR -32[rbp]	# // found_substr_start
 	sub	rax, QWORD PTR -16[rbp]	# || rsi = found_substr_start - str_to_search_in
 	mov	rsi, rax				# |\
@@ -296,6 +387,10 @@ main:
 	cmp	DWORD PTR -4[rbp], 1	# / if (input_mode == 1)
 	jne	.L19					# \ if not, go to L19
 
+	# printf()
+	# rsi - value
+	# rdi - format
+	# eax - count of xmm values 
 	mov	rax, QWORD PTR -32[rbp]	# //
 	sub	rax, QWORD PTR -16[rbp]	# || rax = str_to_search_in - found_substr_start
 	mov	rdx, rax				# |\ rdx
@@ -305,9 +400,14 @@ main:
 	mov	eax, 0					# |	eax = 0
 	call	fprintf@PLT			# \ fprintf(output_file, "%ld ", found_substr_start - str_to_search_in)
 .L19:
+	# clock()
 	call	clock@PLT			# /
 	mov	QWORD PTR -80[rbp], rax	# \ start_time = clock()
 
+	# my_strstr()
+	# rdi - str
+	# rsi - substr
+	# rax (return) - start of substr in str or NULL if not found
 	mov	rax, QWORD PTR -32[rbp]	# //
 	lea	rdx, 1[rax]				# |\ rdx = found_substr_start + 1
 	mov	rax, QWORD PTR -48[rbp]	# |/
@@ -316,6 +416,7 @@ main:
 	call	my_strstr@PLT		# | 
 	mov	QWORD PTR -32[rbp], rax	# \ found_substr_start = my_strstr(found_substr_start + 1, str_to_find)
 
+	# clock()
 	call	clock@PLT			# /
 	mov	QWORD PTR -88[rbp], rax	# \end_time = clock()
 
@@ -356,6 +457,10 @@ main:
 	mov	rdi, rax				# |\ rdi = str_to_search_in
 	call	free@PLT			# \ free(str_to_search_in)
 
+	# printf()
+	# rsi - value
+	# rdi - format
+	# eax - count of xmm values 
 	mov	eax, DWORD PTR -8[rbp]	# / clocks_elapsed
 	cdqe						# |
 	mov	rsi, rax				# |

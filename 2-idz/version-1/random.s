@@ -2,6 +2,21 @@
 	.text
 	.globl	generate_random_string
 	.type	generate_random_string, @function
+# ## generate_random_string()
+# ### Локальные переменные
+# - DWORD -4[rbp]  - i
+# - DWORD -8[rbp]  - generated_size
+# - DWORD -12[rbp] - substr_size
+# - QWORD -24[rbp] - substr
+# - QWORD -32[rbp] - str
+# - DWORD -36[rbp] - size
+# - DWORD -40[rbp] - seed
+
+# ### Параметры и возвращаемый результат
+# - rdi - substr
+# - rsi - str
+# - edx - size
+# - ecx - seed
 generate_random_string:
 	endbr64	
 	push	rbp

@@ -10,6 +10,19 @@
 	.text
 	.globl	read_string_from_file
 	.type	read_string_from_file, @function
+# ## read_string_from_file()
+# ### Локальные переменные
+# - DWORD -4[rbp]  - i
+# - DWORD -8[rbp]  - eof_flag
+# - QWORD -16[rbp] - *file
+# - QWORD -32[rbp] - str
+# - QWORD -40[rbp] - *file_path
+# - DWORD -44[rbp] - max_size
+
+# ### Параметры и возвращаемый результат
+# - rdi - file_path
+# - esi - max_size
+# - rax (return) - pointer to the string
 read_string_from_file:
 	endbr64	
 	push	rbp	
@@ -54,7 +67,9 @@ read_string_from_file:
 	mov	eax, DWORD PTR -4[rbp]	# / i
 	cmp	eax, DWORD PTR -44[rbp]	# | max_size
 	jl	.L3						# \ if(i >= max_size)
-
+	
+	# puts()
+	# rdi - string
 	lea	rdi, .LC1[rip]	# / 
 	call	puts@PLT	# \ printf("File is too big\n")#
         
