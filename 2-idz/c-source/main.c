@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-// #include "consoleio.h"
-// #include "fileio.h"
 #include "stringprocessor.h"
 #include "random.h"
 #include "time.h"
