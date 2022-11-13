@@ -1,6 +1,0 @@
-# ninja log v5
-1	54	6900486495890788	CMakeFiles/2.dir/main.c.obj	b5b254015a261014
-2	39	6900483993379459	CMakeFiles/2.dir/stringprocessor.c.obj	95eedc8ed197b8fb
-1	45	6900477793831311	CMakeFiles/2.dir/random.c.obj	6e6abdf448baf002
-54	113	6900486496455790	2.exe	7c0037c28146683b
-0	93	6900535742410195	build.ninja	546cfcf883c823b6
