@@ -1,9 +1,9 @@
 # СКАЧАТЬ ТОЛЬКО ЭТО ПАПКУ МОЖНО ПО ССЫЛКЕ:
-**https://download-directory.github.io/?url=https%3A%2F%2Fgithub.com%2FEfmprof%2Favs-hse-22%2Ftree%2Fmain%2F1-idz**
+**https://download-directory.github.io/?url=https%3A%2F%2Fgithub.com%2FEfmprof%2Favs-hse-22%2Ftree%2Fmain%2F2-idz**
 # ИЛИ ТУТ
-**https://downgit.github.io/#/home?url=https://github.com/Efmprof/avs-hse-22/tree/main/1-idz**
+**https://downgit.github.io/#/home?url=https://github.com/Efmprof/avs-hse-22/tree/main/2-idz**
 
-# ИДЗ-1. Работа с массивами
+# ИДЗ-2. Работа с массивами
 ## Евсеев Евгений Васильевич БПИ 212. Вариант 18.
 # Задание
 Сформировать массив B из элементов массива A уменьшением всех элементов до первого положительного на 5.
@@ -239,19 +239,22 @@ gcc *.c -masm=intel -fno-asynchronous-unwind-tables -fno-jump-tables -fno-stack-
 
 
 # Функции и локальные переменные в ASM
-### main()
-#### Локальные переменные
+## main()
+### Локальные переменные
 ```
-- DWORD -4[rbp]     - array_size
-- DWORD -8[rbp]     - rand_seed
-- DWORD -12[rbp]    - input_mode
-- DWORD -16[rbp]    - clocks_elapsed
-- DWORD -20[rbp]    - i
-- QWORD -32[rbp]    - file_path
-- QWORD -40[rbp]    - start_time 
-- QWORD -48[rbp]    - end_time
-- DWORD -52[rbp]    - количество аргументов запуска
-- QWORD -64[rbp]    - указатель на аргументы
+- DWORD -4[rbp]  - input_mode
+- DWORD -8[rbp]  - clocks_elapsed
+- QWORD -16[rbp] - *str_to_search_in
+- DWORD -20[rbp] - i
+- QWORD -32[rbp] - *found_substr_start
+- QWORD -40[rbp] - *output_file
+- QWORD -48[rbp] - *str_to_find
+- DWORD -52[rbp] - rand_seed
+- DWORD -56[rbp] - string_size_to_generate
+- QWORD -64[rbp] - file_path
+- DWORD -68[rbp] - passes
+- QWORD -80[rbp] - start_time
+- QWORD -88[rbp] - end_time### Параметры и возвращаемый результат
 ```
 #### Параметры и возвращаемый результат
 ```
@@ -260,115 +263,93 @@ gcc *.c -masm=intel -fno-asynchronous-unwind-tables -fno-jump-tables -fno-stack-
 - rax (return) - exit code
 ```
 
-### random_fill_array()
-#### Локальные переменные
+## read_string_from_console()
+### Локальные переменные
 ```
-- DWORD -4[rbp]     - i
-- QWORD -24[rbp]	- &array
-- DWORD -28[rbp]    - size
-- DWORD -32[rbp]	- seed
+- DWORD -4[rbp]  - i
+- DWORD -8[rbp]  - eof_flag 
+- QWORD -16[rbp] - *str
+- DWORD -20[rbp] - max_size
 ```
-#### Параметры и возвращаемый результат
 ```
-- rdi - &array
-- esi - size
-- edx - seed
-- rax (return) - array_size
+### Параметры и возвращаемый результат
+- edi - max_size
+- rax (return) - pointer to the string
 ```
 
-### process_array()
-#### Локальные переменные
+## read_string_from_file()
+### Локальные переменные
 ```
-- DWORD -4[rbp]     - i
-- QWORD -24[rbp]    - &array
-- DWORD -28[rbp]    - size
+- DWORD -4[rbp]  - i
+- DWORD -8[rbp]  - eof_flag
+- QWORD -16[rbp] - *file
+- QWORD -32[rbp] - str
+- QWORD -40[rbp] - *file_path
+- DWORD -44[rbp] - max_size
 ```
-#### Параметры и возвращаемый результат
+### Параметры и возвращаемый результат
 ```
-- rdi - &array
-- esi - size
-```
-### read_array_from_console()
-#### Локальные переменные
-```
-- DWORD -4[rbp]     - i
-- DWORD -8[rbp]     - n
-- QWORD -24[rbp]    - &array
-- DWORD -28[rbp]    - max_size
-```
-#### Параметры и возвращаемый результат
-```
-- rdi - &array
+- rdi - file_path
 - esi - max_size
-- rax (return) - array_size
+- rax (return) - pointer to the string
 ```
 
-### print_array()
-#### Локальные переменные
+## my_strstr()
+### Локальные переменные
 ```
-- DWORD -4[rbp]     - i
-- QWORD -24[rbp]    - &array
-- DWORD -28[rbp]    - size
+- DWORD -4[rbp]  - i
+- DWORD -8[rbp]  - j
+- DWORD -12[rbp] - k
+- QWORD -24[rbp] - str
+- QWORD -32[rbp] - substr
 ```
-#### Параметры и возвращаемый результат
+### Параметры и возвращаемый результат
 ```
-- rdi - &array
-- esi - size
-```
-### read_array_from_file()
-#### Локальные переменные
-```
-- DWORD -4[rbp]     - i
-- QWORD -16[rbp]    - &in_file
-- DWORD -20[rbp]    - n
-- QWORD -40[rbp]    - &array
-- QWORD -48[rbp]    - &filepath
-- DWORD -52[rbp]    - max_size
-```
-#### Параметры и возвращаемый результат
-```
-- rdi - &array
-- rsi - &filepath
-- edx - max_size
-- rax (return) - array_size
-```
-### save_array_to_file() !!!!!!!!
-#### Локальные переменные
-```
-- QWORD -16[rbp]    - &out_file
-- QWORD -24[rbp]    - &array
-- DWORD -28[rbp]    - size
-- QWORD -40[rbp]    - &filepath
-```
-#### Параметры и возвращаемый результат
-```
-- rdi - &array
-- rsi - size
-- edx - &filepath
+- rdi - str
+- rsi - substr
+- rax (return) - start of substr in str or NULL if not found
 ```
 
+## generate_random_string()
+### Локальные переменные
+```
+- DWORD -4[rbp]  - i
+- DWORD -8[rbp]  - generated_size
+- DWORD -12[rbp] - substr_size
+- QWORD -24[rbp] - substr
+- QWORD -32[rbp] - str
+- DWORD -36[rbp] - size
+- DWORD -40[rbp] - seed
+```
+### Параметры и возвращаемый результат
+```
+- rdi - substr
+- rsi - str
+- edx - size
+- ecx - seed
+```
 
 # Checklist
 ### Оценка 4
-- [] Приведено решение задачи на C.
-- [] В полученную ассемблерную программу, откомпилированную без оптимизирующих и отладочных опций, добавлены комментарии, поясняющие
+- [x] Приведено решение задачи на C.
+- [x] В полученную ассемблерную программу, откомпилированную без оптимизирующих и отладочных опций, добавлены комментарии, поясняющие
 эквивалентное представление переменных в программе на C.
-- [] Из ассемблерной программы убраны лишние макросы за счет использования соответствующих аргументов командной строки и/или за счет
+- [x] Из ассемблерной программы убраны лишние макросы за счет использования соответствующих аргументов командной строки и/или за счет
 ручного редактирования исходного текста ассемблерной программы.
-- [] Модифицированная ассемблерная программа отдельно откомпилирована
+- [x] Модифицированная ассемблерная программа отдельно откомпилирована
 и скомпонована без использования опций отладки.
-- [] Представлено полное тестовое покрытие, дающее одинаковый результат
+- [x] Представлено полное тестовое покрытие, дающее одинаковый результат
 на обоих программах. Приведены результаты тестовых прогонов для обоих программ, демонстрирующие эквивалентность функционирования.
-- [] Сформировать отчет, описывающий результаты тестовых прогонов и используемых опций компиляции и/или описания проведенных модификаций.
+- [x] Сформировать отчет, описывающий результаты тестовых прогонов и используемых опций компиляции и/или описания проведенных модификаций.
 
 ### Оценка 5
-- [] В реализованной программе использовать функции с передачей данных
+- [x] В реализованной программе использовать функции с передачей данных
 через параметры.
-- [] Использовать локальные переменные.
+- [x] Использовать локальные переменные.
 - [] В ассемблерную программу при вызове функции добавить комментарии,
 описывающие передачу фактических параметров и перенос возвращаемого результата.
 - [] В функциях для формальных параметров добавить комментарии, описывающие связь между параметрами языка Си и регистрами (стеком).
-- [] Добавить информацию о проведенных изменениях в отчет.
+- [x] Добавить информацию о проведенных изменениях в отчет.
 
 ### Оценка 6
 
