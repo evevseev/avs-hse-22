@@ -1,14 +1,6 @@
-# СКАЧАТЬ ТОЛЬКО ЭТО ПАПКУ МОЖНО ПО ССЫЛКЕ:
+# ИДЗ-3. Работа с числами с плавающей точкой.
 
-**https://download-directory.github.io/?url=https%3A%2F%2Fgithub.com%2FEfmprof%2Favs-hse-22%2Ftree%2Fmain%2Fidz-3**
-
-# ИЛИ ТУТ
-
-**https://downgit.github.io/#/home?url=https://github.com/Efmprof/avs-hse-22/tree/main/idz-3**
-
-# ИДЗ-3. Работа с числами с плавающей точкой
-
-## Евсеев Евгений Васильевич БПИ 212. Вариант 33.
+## Вариант 33.
 
 # Задание
 

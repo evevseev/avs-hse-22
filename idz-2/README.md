@@ -1,14 +1,6 @@
-# СКАЧАТЬ ТОЛЬКО ЭТО ПАПКУ МОЖНО ПО ССЫЛКЕ:
+# ИДЗ-2. Работа с массивами.
 
-**https://download-directory.github.io/?url=https%3A%2F%2Fgithub.com%2FEfmprof%2Favs-hse-22%2Ftree%2Fmain%2Fidz-2**
-
-# ИЛИ ТУТ
-
-**https://downgit.github.io/#/home?url=https://github.com/Efmprof/avs-hse-22/tree/main/idz-2**
-
-# ИДЗ-2. Работа с массивами
-
-## Евсеев Евгений Васильевич БПИ 212. Вариант 24.
+## Вариант 24.
 
 # Задание
 
