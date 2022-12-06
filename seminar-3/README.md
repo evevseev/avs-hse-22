@@ -51,7 +51,7 @@ main:
         ret                 # back to caller
 ```
 
-## ![](/3-seminar/screenshots/1.jpg)
+## ![](/seminar-3/screenshots/1.jpg)
 
 ### 02-register.s
 
@@ -80,7 +80,7 @@ main:
 
 ```
 
-## ![](/3-seminar/screenshots/2.jpg)
+## ![](/seminar-3/screenshots/2.jpg)
 
 ### 03-memory.s
 
@@ -108,8 +108,8 @@ main:
         ret                 # back to caller
 ```
 
-![](/3-seminar/screenshots/3-1.jpg)
-![](/3-seminar/screenshots/3-2.jpg)
+![](/seminar-3/screenshots/3-1.jpg)
+![](/seminar-3/screenshots/3-2.jpg)
 
 ### 04-constToMemory.s
 
@@ -137,7 +137,7 @@ main:
         ret                 # back to caller
 ```
 
-## ![](/3-seminar/screenshots/4.jpg)
+## ![](/seminar-3/screenshots/4.jpg)
 
 ### 05-jumps.s
 
@@ -168,7 +168,7 @@ forward:
 
 ```
 
-## ![](/3-seminar/screenshots/5.jpg)
+## ![](/seminar-3/screenshots/5.jpg)
 
 ## Сравнительная таблица инструментов для отладки ASM
 
