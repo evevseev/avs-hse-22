@@ -8,6 +8,6 @@
 ### Запуск программы с правками
 *Функция* `x * x + 0.3 * x`
 
-[Первый прогон](/screenshots/2.png)
-[Второй прогон](/screenshots/3.png)
-[Третий прогон](/screenshots/4.png)
+![Первый прогон](/screenshots/2.png)
+![Второй прогон](/screenshots/3.png)
+![Третий прогон](/screenshots/4.png)
