@@ -6,8 +6,14 @@
 #define CPP_SOURCE_PRODUCT_H
 
 
-class Product {
+struct Product {
+    enum Type {
+        BREAD, MILK
+    };
 
+    Product(Type type) : type(type) {}
+
+    Type type;
 };
 
 
