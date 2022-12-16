@@ -8,9 +8,12 @@
 #include "pthread.h"
 #include "ostream"
 
+/*
+ * Logger
+ */
 class Logger {
 public:
-    Logger(std::ostream *output_stream) {
+    explicit Logger(std::ostream *output_stream) {
         stream = output_stream;
         pthread_mutex_init(&out_mutex, nullptr);
 
@@ -20,15 +23,14 @@ public:
        pthread_mutex_destroy(&out_mutex);
     }
 
-    void log(std::string text) {
-//        pthread_mutex_lock(&out_mutex);
-//        *stream << text << "\n";
-//        pthread_mutex_unlock(&out_mutex);
-    }
+    // Сохранить Лог
+    void log(std::string text);
 
 private:
     std::ostream *stream;
-    pthread_mutex_t out_mutex;
+
+    // Мьютекс по работе с консолью
+    pthread_mutex_t out_mutex{};
 };
 
 

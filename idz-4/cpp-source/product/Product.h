@@ -5,16 +5,17 @@
 #ifndef CPP_SOURCE_PRODUCT_H
 #define CPP_SOURCE_PRODUCT_H
 
-
+/**
+ * Товар
+ */
 struct Product {
     enum Type {
         BREAD, MILK
     };
 
-    Product(Type type) : type(type) {}
+    explicit Product(Type type) : type(type) {}
 
     Type type;
 };
-
 
 #endif //CPP_SOURCE_PRODUCT_H

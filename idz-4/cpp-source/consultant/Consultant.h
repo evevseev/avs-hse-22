@@ -10,92 +10,65 @@
 #include "../utils/SafeQueue.h"
 #include <unistd.h>
 #include <queue>
+#include <utility>
 #include <semaphore.h>
 
 
+/**
+ * Консультант
+ */
 class Consultant {
 public:
     Consultant(std::string name, Logger *logger, SafeQueue<pthread_t> *queue) {
         this->logger = logger;
-        this->name = name;
+        this->name = std::move(name);
         this->queue = queue;
 
-        pthread_cond_init(&avaiable_for_customer, nullptr);
+        pthread_cond_init(&available_for_customer, nullptr);
         pthread_cond_init(&action_required, nullptr);
-
-        // sem_init(&free_for_customers, 0, 0); // check second attrbute
         pthread_mutex_init(&consultant_mutex, nullptr);
-        // logger->log("[Consultant #" + std::to_string(id) + "] Created");
     }
 
 
     ~Consultant() {
-        pthread_cond_destroy(&avaiable_for_customer);
+        pthread_cond_destroy(&available_for_customer);
         pthread_cond_destroy(&action_required);
 
         pthread_mutex_destroy(&consultant_mutex);
-
-        // logger->log("[Consultant #" + std::to_string(id) + "] Deleted");
-
     }
 
-    pthread_cond_t avaiable_for_customer;
-    sem_t free_for_customers;
-    pthread_cond_t action_required;
-    pthread_mutex_t consultant_mutex;
+    // Условная переменная, отправляет сигнал о том, что Консультант готов обслуживать следующего Покупателя
+    pthread_cond_t available_for_customer{};
 
-    // pthread_mutex_t *consultant_work;
-    void startWork() {
-        logger->log("[Consultant #" + name + "] Work start");
-        pthread_create(&thread, nullptr, threadFunction, this);
-    }
+    // Условная переменная, которая будет Консультанта
+    pthread_cond_t action_required{};
 
-    void stopWork() {
-        working = false;
-        pthread_cond_signal(&action_required);
-        pthread_join(thread, nullptr);
-        logger->log("[Consultant #" + name + "] Work finish");
-    }
+    // Мьютекс на работу Консультанта (с клиентом)
+    pthread_mutex_t consultant_mutex{};
 
-    pthread_t previous_client;
+    // Хранит последний обработанный поток
+    pthread_t previous_client{};
+
+
+
+    // Отправить Консультанта на работу
+    void startWork();
+
+    // Отправить Консультанта на работу
+    void stopWork();
 
 private:
     Logger *logger;
     std::string name;
-    pthread_t thread;
-    SafeQueue<pthread_t> *queue;
     bool working = true;
 
+    pthread_t thread{};
 
-    static void *threadFunction(void *params) {
-        Consultant &cons = *(Consultant *) params;
-        pthread_mutex_lock(&cons.consultant_mutex);
-        //sem_post(&cons.free_for_customers);
-        while (cons.working) {
-            do {
-                cons.logger->log("[Consultant #" + cons.name + "] Notifies that he avaiable");
-                pthread_cond_broadcast(&cons.avaiable_for_customer);
-                cons.logger->log("[Consultant #" + cons.name + "] Waits for action command");
-                pthread_cond_wait(&cons.action_required, &cons.consultant_mutex);
-                cons.logger->log("[Consultant #" + cons.name + "] Command recieved");
-            } while (cons.queue->empty() && cons.working);
+    // Указатель на очередь отдела
+    SafeQueue<pthread_t> *queue;
 
-            cons.logger->log("[Consultant #" + cons.name + "] Do work");
-
-            // Проверяем появились ли люди или просто проснулись
-            if (!cons.queue->empty()) {
-                // Обрабатываем пользователя
-                cons.logger->log("[Consultant #" + cons.name + "] Customer came, working with him...");
-                usleep(1000);
-                cons.previous_client = cons.queue->front();
-                //sem_post(&cons.free_for_customers);
-            } else {
-                cons.logger->log("[Consultant #" + cons.name + "] O. someone called");
-            }
-        }
-        pthread_mutex_unlock(&cons.consultant_mutex);
-        return nullptr;
-    }
+    // Функция потока - работа консультанта на посту
+    static void *threadFunction(void *params);
 };
 
 

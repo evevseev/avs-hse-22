@@ -11,29 +11,21 @@
 
 class Store {
 public:
-    Store(Logger *logger) : logger(logger), milk_department("Milk", logger), bread_department("Bread", logger) {
-        // logger->log("[Store] Created");
+    explicit Store(Logger *logger) : logger(logger), milk_department("Milk", logger),
+                                     bread_department("Bread", logger) {
     };
 
-    ~Store() {
-        // logger->log("[Store] Deleted");
-    }
+    // Открыть магазин
+    void open();
 
-    void open() {
-        milk_department.open();
-        bread_department.open();
-        logger->log("[Store] Opened its doors");
-    }
+    // Закрыть магазин
+    void close();
 
-    void close() {
-        logger->log("[Store] Manager went to close shop");
-        milk_department.close();
-        bread_department.close();
-        logger->log("[Store] Closed!");
-    }
+    // Отдел хлеба
+    Department bread_department;
 
-   Department bread_department;
-   Department milk_department;
+    // Отдел молока
+    Department milk_department;
 private:
     Logger *logger;
 };
