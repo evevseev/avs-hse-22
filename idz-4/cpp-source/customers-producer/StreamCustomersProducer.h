@@ -21,21 +21,15 @@ public:
         std::list<Product> products;
         size_t counter = 0;
         char ch;
-        while (*stream >> ch && counter < qnt) {
+        while (counter < qnt && *stream >> ch) {
             ch = (char) tolower(ch);
-            logger->log(std::to_string(ch));
-
             if (ch == ';') {
                 data.emplace_back(counter++, logger, products, store);
                 products.clear();
             } else if (ch == 'm') {
                 products.emplace_back(Product::MILK);
-                //logger->log("MILK");
-
             } else if (ch == 'b') {
                 products.emplace_back(Product::BREAD);
-                //logger->log("MILK");
-
             }
         }
         return data;
