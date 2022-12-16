@@ -1,0 +1,93 @@
+[Departament #Milk] Opened
+[Consultant #Milk] Begins to work...
+[Departament #Bread] Opened
+[Consultant #Bread] Begins to work...
+[Store] Opened its doors for customer
+[Consultant #Milk] Notifies that he avaiable
+[Consultant #Milk] Waits for action command
+[Customer #0] Went to the shop
+[Consultant #Bread] Notifies that he avaiable
+[Consultant #Bread] Waits for action command
+[Customer #1] Went to the shop
+[Customer #2] Went to the shop
+[Customer #3] Went to the shop
+[Customer #2] Goes in queue for Milk
+[Departament #Milk] Notifies Consultant that Customer need attention
+[Customer #4] Went to the shop
+[Consultant #Milk] Is doing work
+[Consultant #Milk] Customer came, working with him...
+[Customer #4] Went out of shop
+[Customer #1] Goes in queue for Milk
+[Customer #0] Goes in queue for Bread
+[Departament #Bread] Notifies Consultant that Customer need attention
+[Consultant #Bread] Is doing work
+[Consultant #Bread] Customer came, working with him...
+[Customer #3] Went out of shop
+[Consultant #Bread] Notifies that he avaiable
+[Consultant #Milk] Notifies that he avaiable
+[Consultant #Bread] Waits for action command
+[Departament #Bread] Consultant if free. Client is coming!
+[Consultant #Milk] Waits for action command
+[Departament #Bread] Client has been served
+[Customer #0] Bought something
+[Customer #0] Goes in queue for Milk
+[Departament #Milk] Notifies Consultant that Customer need attention
+[Consultant #Milk] Is doing work
+[Consultant #Milk] Customer came, working with him...
+[Consultant #Milk] Notifies that he avaiable
+[Consultant #Milk] Waits for action command
+[Departament #Milk] Notifies Consultant that Customer need attention
+[Departament #Milk] Consultant if free. Client is coming!
+[Departament #Milk] Client has been served
+[Customer #2] Bought something
+[Customer #2] Goes in queue for Milk
+[Departament #Milk] Notifies Consultant that Customer need attention
+[Departament #Milk] Consultant if free. Client is coming!
+[Departament #Milk] Notifies Consultant that Customer need attention
+[Consultant #Milk] Is doing work
+[Consultant #Milk] Customer came, working with him...
+[Consultant #Milk] Notifies that he avaiable
+[Consultant #Milk] Waits for action command
+[Departament #Milk] Consultant if free. Client is coming!
+[Departament #Milk] Client has been served
+[Customer #1] Bought something
+[Departament #Milk] Consultant if free. Client is coming!
+[Departament #Milk] Notifies Consultant that Customer need attention
+[Customer #1] Goes in queue for Bread
+[Departament #Bread] Notifies Consultant that Customer need attention
+[Consultant #Milk] Is doing work
+[Consultant #Milk] Customer came, working with him...
+[Consultant #Bread] Is doing work
+[Consultant #Bread] Customer came, working with him...
+[Consultant #Bread] Notifies that he avaiable
+[Consultant #Milk] Notifies that he avaiable
+[Consultant #Milk] Waits for action command
+[Consultant #Bread] Waits for action command
+[Departament #Milk] Consultant if free. Client is coming!
+[Departament #Milk] Notifies Consultant that Customer need attention
+[Departament #Milk] Consultant if free. Client is coming!
+[Departament #Milk] Client has been served
+[Departament #Bread] Consultant if free. Client is coming!
+[Departament #Bread] Client has been served
+[Consultant #Milk] Is doing work
+[Consultant #Milk] Customer came, working with him...
+[Customer #0] Bought something
+[Customer #1] Bought something
+[Customer #0] Went out of shop
+[Customer #1] Went out of shop
+[Consultant #Milk] Notifies that he avaiable
+[Consultant #Milk] Waits for action command
+[Departament #Milk] Consultant if free. Client is coming!
+[Departament #Milk] Client has been served
+[Customer #2] Bought something
+[Customer #2] Went out of shop
+[Store] Manager went to close shop
+[Consultant #Milk] Is doing work
+[Consultant #Milk] Woke up, but it was not customer
+[Consultant #Milk] Finished work
+[Departament #Milk] Closed
+[Consultant #Bread] Is doing work
+[Consultant #Bread] Woke up, but it was not customer
+[Consultant #Bread] Finished work
+[Departament #Bread] Closed
+[Store] Closed!

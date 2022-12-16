@@ -1,0 +1,120 @@
+[Departament #Milk] Opened
+[Consultant #Milk] Begins to work...
+[Departament #Bread] Opened
+[Consultant #Bread] Begins to work...
+[Consultant #Milk] Notifies that he avaiable
+[Consultant #Milk] Waits for action command
+[Store] Opened its doors for customer
+[Customer #0] Went to the shop
+[Consultant #Bread] Notifies that he avaiable
+[Consultant #Bread] Waits for action command
+[Customer #0] Goes in queue for Bread
+[Departament #Bread] Notifies Consultant that Customer need attention
+[Consultant #Bread] Is doing work
+[Consultant #Bread] Customer came, working with him...
+[Consultant #Bread] Notifies that he avaiable
+[Consultant #Bread] Waits for action command
+[Departament #Bread] Consultant if free. Client is coming!
+[Departament #Bread] Client has been served
+[Customer #0] Bought something
+[Customer #0] Goes in queue for Bread
+[Departament #Bread] Notifies Consultant that Customer need attention
+[Consultant #Bread] Is doing work
+[Consultant #Bread] Customer came, working with him...
+[Consultant #Bread] Notifies that he avaiable
+[Consultant #Bread] Waits for action command
+[Departament #Bread] Consultant if free. Client is coming!
+[Departament #Bread] Client has been served
+[Customer #0] Bought something
+[Customer #0] Goes in queue for Bread
+[Departament #Bread] Notifies Consultant that Customer need attention
+[Consultant #Bread] Is doing work
+[Consultant #Bread] Customer came, working with him...
+[Consultant #Bread] Notifies that he avaiable
+[Consultant #Bread] Waits for action command
+[Departament #Bread] Consultant if free. Client is coming!
+[Departament #Bread] Client has been served
+[Customer #0] Bought something
+[Customer #0] Goes in queue for Milk
+[Departament #Milk] Notifies Consultant that Customer need attention
+[Consultant #Milk] Is doing work
+[Consultant #Milk] Customer came, working with him...
+[Consultant #Milk] Notifies that he avaiable
+[Consultant #Milk] Waits for action command
+[Departament #Milk] Consultant if free. Client is coming!
+[Departament #Milk] Client has been served
+[Customer #0] Bought something
+[Customer #0] Goes in queue for Milk
+[Departament #Milk] Notifies Consultant that Customer need attention
+[Consultant #Milk] Is doing work
+[Consultant #Milk] Customer came, working with him...
+[Consultant #Milk] Notifies that he avaiable
+[Consultant #Milk] Waits for action command
+[Departament #Milk] Consultant if free. Client is coming!
+[Departament #Milk] Client has been served
+[Customer #0] Bought something
+[Customer #0] Goes in queue for Milk
+[Departament #Milk] Notifies Consultant that Customer need attention
+[Consultant #Milk] Is doing work
+[Consultant #Milk] Customer came, working with him...
+[Consultant #Milk] Notifies that he avaiable
+[Consultant #Milk] Waits for action command
+[Departament #Milk] Consultant if free. Client is coming!
+[Departament #Milk] Client has been served
+[Customer #0] Bought something
+[Customer #0] Goes in queue for Bread
+[Departament #Bread] Notifies Consultant that Customer need attention
+[Consultant #Bread] Is doing work
+[Consultant #Bread] Customer came, working with him...
+[Consultant #Bread] Notifies that he avaiable
+[Consultant #Bread] Waits for action command
+[Departament #Bread] Consultant if free. Client is coming!
+[Departament #Bread] Client has been served
+[Customer #0] Bought something
+[Customer #0] Goes in queue for Milk
+[Departament #Milk] Notifies Consultant that Customer need attention
+[Consultant #Milk] Is doing work
+[Consultant #Milk] Customer came, working with him...
+[Consultant #Milk] Notifies that he avaiable
+[Consultant #Milk] Waits for action command
+[Departament #Milk] Consultant if free. Client is coming!
+[Departament #Milk] Client has been served
+[Customer #0] Bought something
+[Customer #0] Goes in queue for Bread
+[Departament #Bread] Notifies Consultant that Customer need attention
+[Consultant #Bread] Is doing work
+[Consultant #Bread] Customer came, working with him...
+[Consultant #Bread] Notifies that he avaiable
+[Consultant #Bread] Waits for action command
+[Departament #Bread] Consultant if free. Client is coming!
+[Departament #Bread] Client has been served
+[Customer #0] Bought something
+[Customer #0] Goes in queue for Milk
+[Departament #Milk] Notifies Consultant that Customer need attention
+[Consultant #Milk] Is doing work
+[Consultant #Milk] Customer came, working with him...
+[Consultant #Milk] Notifies that he avaiable
+[Consultant #Milk] Waits for action command
+[Departament #Milk] Consultant if free. Client is coming!
+[Departament #Milk] Client has been served
+[Customer #0] Bought something
+[Customer #0] Goes in queue for Bread
+[Departament #Bread] Notifies Consultant that Customer need attention
+[Consultant #Bread] Is doing work
+[Consultant #Bread] Customer came, working with him...
+[Consultant #Bread] Notifies that he avaiable
+[Consultant #Bread] Waits for action command
+[Departament #Bread] Consultant if free. Client is coming!
+[Departament #Bread] Client has been served
+[Customer #0] Bought something
+[Customer #0] Went out of shop
+[Store] Manager went to close shop
+[Consultant #Milk] Is doing work
+[Consultant #Milk] Woke up, but it was not customer
+[Consultant #Milk] Finished work
+[Departament #Milk] Closed
+[Consultant #Bread] Is doing work
+[Consultant #Bread] Woke up, but it was not customer
+[Consultant #Bread] Finished work
+[Departament #Bread] Closed
+[Store] Closed!
