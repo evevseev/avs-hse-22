@@ -12,7 +12,6 @@
 class StreamCustomersProducer : CustomersProducer {
 public:
     StreamCustomersProducer(std::istream *stream, Store *store, Logger* logger) : CustomersProducer(store, logger), stream(stream) {
-
     }
 
     std::vector<Customer> getCustomers(size_t qnt) override {
