@@ -1,4 +1,5 @@
 classwork/
-.idea/
 examples/
+
+.idea/
 cmake-build-debug/
